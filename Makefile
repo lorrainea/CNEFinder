@@ -8,7 +8,7 @@ LFLAGS= -std=c++11 -I ./
  
 EXE=    mim
  
-SRC=    mim.cc extend.cc utils.cc qgrams.cc overlaps.cc
+SRC=    mim.cc extend.cc utils.cc qgrams.cc overlaps.cc edlib.cc
  
 HD=     mim.h qgrams.h file.h qlist.h Makefile
  

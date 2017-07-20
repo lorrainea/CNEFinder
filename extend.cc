@@ -1003,19 +1003,15 @@ return no_q_grams;
 
 /*
 Myers Bit-Vector algorithm implemented using SeqAn Library
-www.seqan.de
+edlib library
 */
 int editDistanceMyers( unsigned char * xInput, unsigned char * yInput )
 {
-	typedef String<char> TSequence;
-
-	TSequence seq1 = xInput;
-	TSequence seq2 = yInput;
-
-	int score = globalAlignmentScore( seq1, seq2, MyersBitVector() )/-1;
+	int score = edlibAlign( (const char*) xInput, strlen( (char*) xInput ), (const char*) yInput, strlen( (char*) yInput ), edlibDefaultAlignConfig()).editDistance;
 
 	return score;
 }
+
 
 /*
 Computes q-gram distance between two sequences
