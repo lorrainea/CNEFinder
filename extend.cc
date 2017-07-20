@@ -1002,7 +1002,7 @@ return no_q_grams;
 }
 
 /*
-Myers Bit-Vector algorithm implemented using SeqAn Library
+Myers Bit-Vector algorithm implemented using edlib Library
 edlib library
 */
 int editDistanceMyers( unsigned char * xInput, unsigned char * yInput )
