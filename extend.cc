@@ -30,6 +30,7 @@
 #include <seqan/index.h>
 #include <seqan/align.h>
 #include "mim.h"
+#include "edlib.h"
 
 using namespace std;
 using namespace seqan;
