@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 
 unzip seqan.zip
 rm seqan.zip
