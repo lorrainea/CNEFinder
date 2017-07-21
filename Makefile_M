@@ -1,4 +1,4 @@
-MF=     Makefile
+MF=     Makefile_M
  
 CC=     g++-7
  
@@ -8,9 +8,9 @@ LFLAGS= -std=c++11 -I ./
  
 EXE=    mim
  
-SRC=    mim.cc extend.cc utils.cc qgrams.cc overlaps.cc
+SRC=    mim.cc extend.cc utils.cc qgrams.cc overlaps.cc edlib.cc
  
-HD=     mim.h qgrams.h file.h qlist.h Makefile
+HD=     mim.h qgrams.h file.h qlist.h Makefile_M
  
 # 
 # No need to edit below this line 
