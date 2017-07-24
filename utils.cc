@@ -37,14 +37,20 @@ static struct option long_options[] =
    { "sim-threshold",          		required_argument, NULL, 'k' },
    { "threads", 			required_argument, NULL, 'T' },
    { "exons-file", 			required_argument, NULL, 'e' },
-   { "ref-gene-file", 			required_argument, NULL, 'g' },
-   { "ref-gene-name", 			required_argument, NULL, 'n' },
+   { "ref-gene-file", 			optional_argument, NULL, 'g' },
+   { "ref-gene-name", 			optional_argument, NULL, 'n' },
    { "ref-exons-file", 			required_argument, NULL, 'e' },
-   { "query-gene-file", 		required_argument, NULL, 'j' },
-   { "query-gene-name", 		required_argument, NULL, 'm' },
+   { "query-gene-file", 		optional_argument, NULL, 'j' },
+   { "query-gene-name", 		optional_argument, NULL, 'm' },
    { "query-exons-file", 		required_argument, NULL, 'f' },
    { "rev-complement",                  optional_argument, NULL, 'v' },
    { "remove-overlaps",			optional_argument, NULL, 'x' },
+   { "ref-start", 			optional_argument, NULL, 'a' },
+   { "ref-end", 			optional_argument, NULL, 'b' },
+   { "query-start",                     optional_argument, NULL, 'c' },
+   { "query-end",			optional_argument, NULL, 'd' },
+   { "ref-chrom",                       optional_argument, NULL, 'y' },
+   { "query-chrom",			optional_argument, NULL, 'z' },
    { "help",                    	no_argument,       NULL, 'h' },
    { NULL,                      	0,                 NULL,  0  }
  };
@@ -75,10 +81,16 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
    sw -> query_gene_name		= NULL;
    sw -> ref_exons_filename		= NULL;
    sw -> query_exons_filename		= NULL;
+   sw -> ref_chrom			= NULL;
+   sw -> query_chrom			= NULL;
+   sw -> a				= 0;
+   sw -> b				= 0;
+   sw -> c				= 0;
+   sw -> d				= 0;
    sw -> T                              = 1;
    args = 0;
 
-   while ( ( opt = getopt_long ( argc, argv, "q:r:o:e:f:g:j:x:n:m:l:k:v:T:h", long_options, &oi ) ) != -1 ) 
+   while ( ( opt = getopt_long ( argc, argv, "q:r:o:e:f:g:j:x:n:m:l:k:v:a:b:c:d:y:z:T:h", long_options, &oi ) ) != -1 ) 
     {
 
       switch ( opt )
@@ -138,6 +150,18 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
            args ++;
           break;
 
+         case 'y':
+           sw -> ref_chrom = ( char * ) malloc ( ( strlen ( optarg ) + 1 ) * sizeof ( char ) );
+           strcpy ( sw -> ref_chrom, optarg );
+           args ++;
+          break;
+
+	  case 'z':
+           sw ->  query_chrom = ( char * ) malloc ( ( strlen ( optarg ) + 1 ) * sizeof ( char ) );
+           strcpy ( sw -> query_chrom, optarg );
+           args ++;
+          break;
+
          case 'l':
            val = strtol ( optarg, &ep, 10 );
            if ( optarg == ep )
@@ -173,6 +197,46 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
             }
            sw -> v = val;
            break;
+
+	
+	case 'a':
+           val = strtol ( optarg, &ep, 10 );
+           if ( optarg == ep )
+            {
+              return ( 0 );
+            }
+           sw -> a = val;
+           break;
+
+	
+	case 'b':
+           val = strtol ( optarg, &ep, 10 );
+           if ( optarg == ep )
+            {
+              return ( 0 );
+            }
+           sw -> b = val;
+           break;
+
+	
+	case 'c':
+           val = strtol ( optarg, &ep, 10 );
+           if ( optarg == ep )
+            {
+              return ( 0 );
+            }
+           sw -> c = val;
+           break;
+
+	
+	case 'd':
+           val = strtol ( optarg, &ep, 10 );
+           if ( optarg == ep )
+            {
+              return ( 0 );
+            }
+           sw -> d = val;
+           break;
 	
 	 case 'T':
            val = strtod ( optarg, &ep );
@@ -188,7 +252,7 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
        }
     }
 
-   if ( args < 9 )
+   if ( args < 7 )
      {
        usage ();
        exit ( 1 );
@@ -202,22 +266,36 @@ Usage of the tool
 */
 void usage ( void )
  {
-   fprintf ( stdout, " Usage: MIM <options>\n\n" );
+   fprintf ( stdout, " Usage: MIM <options>\n" );
    fprintf ( stdout, " Standard (Mandatory):\n" );
    fprintf ( stdout, "  -r, --ref-genome-file		<str>		FASTA reference genome filename.\n" );
    fprintf ( stdout, "  -q, --query-genome-file	<str>		FASTA query genome filename.\n" );
    fprintf ( stdout, "  -e, --exons-ref-file		<str>		GTF/GFF exon coordinates for reference genome filename.\n" );
    fprintf ( stdout, "  -f, --exons-query-file	<str>		GTF/GFF exon coordinates for query genome filename.\n" );
-   fprintf ( stdout, "  -g, --ref-gene-file		<str>		GTF/GFF filename containing gene data for reference genome.\n" );
-   fprintf ( stdout, "  -n, --ref-gene-name		<str>		Name of gene in reference genome in which CNEs will be identified.\n" );
-   fprintf ( stdout, "  -j, --query-gene-file		<str>		GTF/GFF filename containing gene data for query genome.\n" );
-   fprintf ( stdout, "  -m, --query-gene-name		<str>		Name of gene in query genome in which CNEs will be identified.\n" );
    fprintf ( stdout, "  -l, --min-seq-length		<int>		Minimum length of match.\n" );   
    fprintf ( stdout, "  -k, --sim-threshold		<dbl>		Threshold of similarity between sequences.\n" );
    fprintf ( stdout, "  -o, --output-file		<str>		Output filename with CNEs identified.\n\n" ); 
+
+   fprintf ( stdout, "  Either 1. or 2.\n" );
+   fprintf ( stdout, "    1.Search using gene name:\n" );
+   
+   fprintf ( stdout, "    -g, --ref-gene-file		<str>		GTF/GFF filename containing gene data for reference genome.\n" );
+   fprintf ( stdout, "    -n, --ref-gene-name		<str>		Name of gene in reference genome in which CNEs will be identified.\n" );
+   fprintf ( stdout, "    -j, --query-gene-file	<str>		GTF/GFF filename containing gene data for query genome.\n" );
+   fprintf ( stdout, "    -m, --query-gene-name	<str>		Name of gene in query genome in which CNEs will be identified.\n\n" );
+ 
+   fprintf ( stdout, "    2.Search using coordinates:\n" );
+   fprintf ( stdout, "    -y, --ref-chrom		<str>		Chromsome of reference genome.\n" );
+   fprintf ( stdout, "    -z, --query-chrom		<str>		Chromosome of query genome.\n" );
+   fprintf ( stdout, "    -a, --ref-start		<int>		Start CNE search from this position of reference sequence.\n" );
+   fprintf ( stdout, "    -b, --ref-end		<int>		End CNE search at this position of reference sequence.\n" );
+   fprintf ( stdout, "    -c, --query-start		<int>		Start CNE search from this position of query sequence.\n" );
+   fprintf ( stdout, "    -d, --query-end		<int>		End CNE search at this position of query sequence.\n\n" );
+
    fprintf ( stdout, " Optional:\n" );
    fprintf ( stdout, "  -v, --rev-complement		<int>		Choose 1 to compute CNEs for reverse complement or 0 otherwise. Default:0.\n");						
    fprintf ( stdout, "  -x, --remove-overlaps		<int>		Choose 1 to remove overlapping CNEs or 0 otherwise. Default:1.\n\n" );  
+
    fprintf ( stdout, " Number of threads:\n" ); 
    fprintf ( stdout, "  -T, --threads			<int>		Number of threads to use. Default:1. \n" );
  }

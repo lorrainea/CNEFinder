@@ -44,8 +44,10 @@ struct TSwitch
    char               * query_genes_filename;
    char               * ref_gene_name;
    char               * query_gene_name;
+   char               * ref_chrom;
+   char               * query_chrom;
    double 		k;
-   int 			T, f, g, e, h, n, j, m, x;
+   int 			T, f, g, e, h, n, j, m, x, a, b, c, d;
    unsigned int         l, v;
    
  };

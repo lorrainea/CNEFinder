@@ -49,6 +49,8 @@ int main(int argc, char **argv)
 	char *		query_genes_filename;
 	char * 		query_exons_filename;
         char *          output_filename;        
+        char * 		ref_chrom;
+	char * 		query_chrom;
 
         unsigned char ** genome1    = NULL;         	
 	unsigned char ** genome2   = NULL;  
@@ -79,7 +81,7 @@ int main(int argc, char **argv)
 	omp_set_num_threads( sw.T );
 
 	/* Check the arguments */
-        if ( i < 9 )
+        if ( i < 7 )
         {
 		usage ();
                 return ( 1 );
@@ -89,9 +91,61 @@ int main(int argc, char **argv)
 
 		genome_one_filename = sw . genome_one_filename;
 		genome_two_filename = sw . genome_two_filename;
-		ref_genes_filename = sw . ref_genes_filename;
+
+		if( sw . ref_genes_filename != NULL )
+		{
+			ref_genes_filename = sw . ref_genes_filename;	
+
+			if ( ref_genes_filename == NULL  )
+			{
+				fprintf ( stderr, " Error: Cannot open gene data file for reference genome!\n" );
+				return ( 1 );
+			}
+		}
+		else if( sw . ref_chrom != NULL )
+		{
+			ref_chrom = sw . ref_chrom;	
+
+			if ( ref_chrom == NULL )
+			{
+				fprintf ( stderr, " Error: Chromosome name for reference sequence required!\n" );
+				return ( 1 );
+			}
+		}
+		else
+		{
+			fprintf ( stderr, " Error: Choose gene name or coordinates for reference sequence to search for CNEs!\n" );
+			return ( 1 );
+		}
+
+		
+		if( sw . query_genes_filename != NULL )
+		{
+			query_genes_filename = sw . query_genes_filename;
+
+			if ( query_genes_filename == NULL )
+			{
+				fprintf ( stderr, " Error: Cannot open gene data file for query genome!\n" );
+				return ( 1 );
+			}
+		}
+		else if( sw . query_chrom != NULL )
+		{
+			query_chrom = sw . query_chrom;	
+
+			if ( query_chrom == NULL )
+			{
+				fprintf ( stderr, " Error: Chromosome name for query sequence required!\n" );
+				return ( 1 );
+			}
+		}
+		else
+		{
+			fprintf ( stderr, " Error: Choose gene name or coordinates for query sequence to search for CNEs!\n" );
+			return ( 1 );
+		}
+
 		ref_exons_filename = sw . ref_exons_filename;
-		query_genes_filename = sw . query_genes_filename;
 		query_exons_filename = sw . query_exons_filename;
 
 		if ( genome_one_filename == NULL )
@@ -109,19 +163,10 @@ int main(int argc, char **argv)
 			fprintf ( stderr, " Error: Cannot open exons data file for reference genome!\n" );
 			return ( 1 );
 		}
-		if ( ref_genes_filename == NULL )
-		{
-			fprintf ( stderr, " Error: Cannot open gene data file for reference genome!\n" );
-			return ( 1 );
-		}
+	
 		if ( query_exons_filename == NULL )
 		{
 			fprintf ( stderr, " Error: Cannot open exons data file for query genome!\n" );
-			return ( 1 );
-		}
-		if ( query_genes_filename == NULL )
-		{
-			fprintf ( stderr, " Error: Cannot open gene data file for query genome!\n" );
 			return ( 1 );
 		}
 
@@ -413,80 +458,83 @@ int main(int argc, char **argv)
 	/* Complete reading referene exons file */
 
 
+	unsigned int num_seqs_g = 0;   
 	/* Read the reference genes file */
-	fprintf ( stderr, " Reading the file: %s\n", ref_genes_filename );
-	if ( ! ( ref_genes_fd = fopen (  ref_genes_filename, "r") ) )
+	if( sw . ref_gene_name != NULL )
 	{
-		fprintf ( stderr, " Error: Cannot open file %s!\n",  ref_genes_filename  );
-		return ( 1 );
-	}
-
-	char cg;
-        unsigned int num_seqs_g = 0;   
-	unsigned int max_alloc_seq_g = 0;
-
-	do
-	{
-
-		if ( num_seqs_g >= max_alloc_seq_g )
+		fprintf ( stderr, " Reading the file: %s\n", ref_genes_filename );
+		if ( ! ( ref_genes_fd = fopen (  ref_genes_filename, "r") ) )
 		{
-			ref_genes = ( unsigned char ** ) realloc ( ref_genes,   ( max_alloc_seq_g + ALLOC_SIZE ) * sizeof ( unsigned char * ) );
-			max_alloc_seq_g += ALLOC_SIZE;
+			fprintf ( stderr, " Error: Cannot open file %s!\n",  ref_genes_filename  );
+			return ( 1 );
 		}
 
-		unsigned int seq_len_g = 0;
-		unsigned int max_alloc_seq_len_g = 0;
+		char cg;
+		
+		unsigned int max_alloc_seq_g = 0;
+
+		do
+		{
+			if ( num_seqs_g >= max_alloc_seq_g )
+			{
+				ref_genes = ( unsigned char ** ) realloc ( ref_genes,   ( max_alloc_seq_g + ALLOC_SIZE ) * sizeof ( unsigned char * ) );
+				max_alloc_seq_g += ALLOC_SIZE;
+			}
+
+			unsigned int seq_len_g = 0;
+			unsigned int max_alloc_seq_len_g = 0;
+
+			ref_genes[ num_seqs_g ] = NULL;
+
+			while ( ( cg = fgetc( ref_genes_fd ) ) != EOF )
+			{
+				if( seq_len_g == 0 && cg == '\n' )
+				{
+					fprintf ( stderr, " Omitting empty line in file %s!\n",  ref_genes_filename );
+					cg = fgetc( ref_genes_fd );
+					break;
+				}
+
+				if( cg == '\n' )
+				{
+					break;	
+				}
+				else
+				{
+
+
+					if ( seq_len_g >= max_alloc_seq_len_g )
+					{
+						ref_genes[ num_seqs_g ] = ( unsigned char * ) realloc ( ref_genes[ num_seqs_g ],   ( max_alloc_seq_len_g + ALLOC_SIZE ) * sizeof ( unsigned char ) );
+						max_alloc_seq_len_g += ALLOC_SIZE;
+					}
+
+					ref_genes[ num_seqs_g ][ seq_len_g++ ] = toupper( cg );
+				}
+			}
+
+			if( seq_len_g != 0 )
+			{
+				if ( seq_len_g >= max_alloc_seq_len_g )
+				{
+					ref_genes[ num_seqs_g ] = ( unsigned char * ) realloc ( ref_genes[ num_seqs_g ],   ( max_alloc_seq_len_g + ALLOC_SIZE ) * sizeof ( unsigned char ) ); 
+					max_alloc_seq_len_g += ALLOC_SIZE;
+				}
+				ref_genes[ num_seqs_g ][ seq_len_g ] = '\0';
+
+				num_seqs_g++;
+			}
+		
+		} while( cg != EOF );
+
 
 		ref_genes[ num_seqs_g ] = NULL;
 
-		while ( ( cg = fgetc( ref_genes_fd ) ) != EOF )
+		if ( fclose ( ref_genes_fd ) )
 		{
-			if( seq_len_g == 0 && cg == '\n' )
-			{
-				fprintf ( stderr, " Omitting empty line in file %s!\n",  ref_genes_filename );
-				cg = fgetc( ref_genes_fd );
-				break;
-			}
-
-			if( cg == '\n' )
-			{
-				break;	
-			}
-			else
-			{
-
-
-				if ( seq_len_g >= max_alloc_seq_len_g )
-				{
-					ref_genes[ num_seqs_g ] = ( unsigned char * ) realloc ( ref_genes[ num_seqs_g ],   ( max_alloc_seq_len_g + ALLOC_SIZE ) * sizeof ( unsigned char ) );
-					max_alloc_seq_len_g += ALLOC_SIZE;
-				}
-
-				ref_genes[ num_seqs_g ][ seq_len_g++ ] = toupper( cg );
-			}
+			fprintf( stderr, " Error: file close error!\n");
+			return ( 1 );
 		}
-
-		if( seq_len_g != 0 )
-		{
-			if ( seq_len_g >= max_alloc_seq_len_g )
-			{
-				ref_genes[ num_seqs_g ] = ( unsigned char * ) realloc ( ref_genes[ num_seqs_g ],   ( max_alloc_seq_len_g + ALLOC_SIZE ) * sizeof ( unsigned char ) ); 
-				max_alloc_seq_len_g += ALLOC_SIZE;
-			}
-			ref_genes[ num_seqs_g ][ seq_len_g ] = '\0';
-
-			num_seqs_g++;
-		}
-		
-	} while( cg != EOF );
-
-
-	ref_genes[ num_seqs_g ] = NULL;
-
-	if ( fclose ( ref_genes_fd ) )
-	{
-		fprintf( stderr, " Error: file close error!\n");
-		return ( 1 );
 	}
 	/* Complete reading reference genes file */
 
@@ -570,77 +618,80 @@ int main(int argc, char **argv)
 	/* Complete reading query exons file */
 
 
+	unsigned int num_seqs_j = 0; 
 	/* Read the query genes file */
-	fprintf ( stderr, " Reading the file: %s\n", query_genes_filename );
-	if ( ! ( query_genes_fd = fopen (  query_genes_filename, "r") ) )
+	if( sw . query_gene_name != NULL )
 	{
-		fprintf ( stderr, " Error: Cannot open file %s!\n",  query_genes_filename  );
-		return ( 1 );
-	}
-
-	char cj;
-        unsigned int num_seqs_j = 0;         
-	unsigned int max_alloc_seq_j = 0;
-
-	do
-	{	if ( num_seqs_j >= max_alloc_seq_j )
+		fprintf ( stderr, " Reading the file: %s\n", query_genes_filename );
+		if ( ! ( query_genes_fd = fopen (  query_genes_filename, "r") ) )
 		{
-			query_genes = ( unsigned char ** ) realloc (query_genes,   ( max_alloc_seq_j + ALLOC_SIZE ) * sizeof ( unsigned char * ) );
-			max_alloc_seq_j += ALLOC_SIZE;
+			fprintf ( stderr, " Error: Cannot open file %s!\n",  query_genes_filename  );
+			return ( 1 );
 		}
 
-		unsigned int seq_len_j = 0;
-		unsigned int max_alloc_seq_len_j = 0;
+		char cj;
+		      
+		unsigned int max_alloc_seq_j = 0;
+		do
+		{	if ( num_seqs_j >= max_alloc_seq_j )
+			{
+				query_genes = ( unsigned char ** ) realloc (query_genes,   ( max_alloc_seq_j + ALLOC_SIZE ) * sizeof ( unsigned char * ) );
+				max_alloc_seq_j += ALLOC_SIZE;
+			}
+
+			unsigned int seq_len_j = 0;
+			unsigned int max_alloc_seq_len_j = 0;
+
+			query_genes[ num_seqs_j ] = NULL;
+
+			while ( ( cj = fgetc( query_genes_fd ) ) != EOF )
+			{
+				if( seq_len_j == 0 && cj == '\n' )
+				{
+					fprintf ( stderr, " Omitting empty line in file %s!\n",  query_genes_filename );
+					cj = fgetc( query_genes_fd );
+					break;
+				}
+
+				if( cj == '\n' )
+				{
+					break;	
+				}
+				else
+				{
+
+
+					if ( seq_len_j >= max_alloc_seq_len_j )
+					{
+						query_genes[ num_seqs_j ] = ( unsigned char * ) realloc ( query_genes[ num_seqs_j ],   ( max_alloc_seq_len_j + ALLOC_SIZE ) * sizeof ( unsigned char ) );
+						max_alloc_seq_len_j += ALLOC_SIZE;
+					}
+
+					query_genes[ num_seqs_j ][ seq_len_j++ ] = toupper( cj );
+				}
+			}
+
+			if( seq_len_j != 0 )
+			{
+				if ( seq_len_j >= max_alloc_seq_len_j )
+				{
+					query_genes[ num_seqs_j ] = ( unsigned char * ) realloc ( query_genes[ num_seqs_j ],   ( max_alloc_seq_len_j + ALLOC_SIZE ) * sizeof ( unsigned char ) ); 
+					max_alloc_seq_len_j += ALLOC_SIZE;
+				}
+				query_genes[ num_seqs_j ][ seq_len_j ] = '\0';
+				num_seqs_j++;
+			}
+		
+		} while( cj != EOF );
+
 
 		query_genes[ num_seqs_j ] = NULL;
 
-		while ( ( cj = fgetc( query_genes_fd ) ) != EOF )
+		if ( fclose ( query_genes_fd ) )
 		{
-			if( seq_len_j == 0 && cj == '\n' )
-			{
-				fprintf ( stderr, " Omitting empty line in file %s!\n",  query_genes_filename );
-				cj = fgetc( query_genes_fd );
-				break;
-			}
-
-			if( cj == '\n' )
-			{
-				break;	
-			}
-			else
-			{
-
-
-				if ( seq_len_j >= max_alloc_seq_len_j )
-				{
-					query_genes[ num_seqs_j ] = ( unsigned char * ) realloc ( query_genes[ num_seqs_j ],   ( max_alloc_seq_len_j + ALLOC_SIZE ) * sizeof ( unsigned char ) );
-					max_alloc_seq_len_j += ALLOC_SIZE;
-				}
-
-				query_genes[ num_seqs_j ][ seq_len_j++ ] = toupper( cj );
-			}
+			fprintf( stderr, " Error: file close error!\n");
+			return ( 1 );
 		}
-
-		if( seq_len_j != 0 )
-		{
-			if ( seq_len_j >= max_alloc_seq_len_j )
-			{
-				query_genes[ num_seqs_j ] = ( unsigned char * ) realloc ( query_genes[ num_seqs_j ],   ( max_alloc_seq_len_j + ALLOC_SIZE ) * sizeof ( unsigned char ) ); 
-				max_alloc_seq_len_j += ALLOC_SIZE;
-			}
-			query_genes[ num_seqs_j ][ seq_len_j ] = '\0';
-			num_seqs_j++;
-		}
-		
-	} while( cj != EOF );
-
-
-	query_genes[ num_seqs_j ] = NULL;
-
-	if ( fclose ( query_genes_fd ) )
-	{
-		fprintf( stderr, " Error: file close error!\n");
-		return ( 1 );
 	}
 	/* Complete reading query genes file */
 
@@ -688,58 +739,76 @@ int main(int argc, char **argv)
 	vector<int> * exons_g2_start = new vector<int>;
 	vector<int> * exons_g2_end = new vector<int>;
 
-	string refGeneName = reinterpret_cast<char*>( sw . ref_gene_name );
-	
-	for (i=0; i<refGeneName.length(); i++)
-    		refGeneName[i] = toupper( refGeneName[i] );
-
-	refGeneName.append( "\t" );
-
-	bool refGeneNameExists = false;
-	for(int i=0; i<num_seqs_g; i++)
-	{
-
-		if( prefix( reinterpret_cast<char*>(ref_genes[i]), refGeneName ) == true )
-		{
-			geneOnePos  = i;
-			refGeneNameExists = true;
-			break;
-		}	
-	}
-
-	if( refGeneNameExists == false )
-	{
-		fprintf( stderr, " Error: Reference gene name does not exist!\n");
-		return ( 1 );
-	}
-
 	int countTabs = 0;
-	string startCoord_g1;
 	string chromosome_g1;
-	string endCoord_g1;
-
-	for(int i=0; i<strlen( (char * ) ref_genes[geneOnePos] ); i++)
+	string refGeneName = to_string( sw . a );
+	refGeneName.append( " - ");
+	refGeneName.append( to_string( sw . b ) );
+	if( sw . ref_gene_name != NULL )
 	{
-		string in = reinterpret_cast<char*>( ref_genes[geneOnePos] );
-
-		if( ref_genes[geneOnePos][i] == '\t' )
-			countTabs++;
-		if( countTabs == 1 )
-			chromosome_g1 +=  in[i] ;
-		if( countTabs == 2 )
-			startCoord_g1 += in[i] ;
-		if( countTabs == 3 )
-			endCoord_g1 += in[i] ;
-	}
-
-	trim( startCoord_g1 );
-	trim(endCoord_g1 );
-	trim(  chromosome_g1 );
-	start_genome_1 = atoi( startCoord_g1.c_str() );
-	end_genome_1 = atoi( endCoord_g1.c_str() );
+		refGeneName = reinterpret_cast<char*>( sw . ref_gene_name );
 	
-	if( prefix( chromosome_g1 , "CHR" ) == false )
-		chromosome_g1.insert( 0, "CHR" );
+		for (i=0; i<refGeneName.length(); i++)
+	    		refGeneName[i] = toupper( refGeneName[i] );
+
+		refGeneName.append( "\t" );
+
+		bool refGeneNameExists = false;
+		for(int i=0; i<num_seqs_g; i++)
+		{
+
+			if( prefix( reinterpret_cast<char*>(ref_genes[i]), refGeneName ) == true )
+			{
+				geneOnePos  = i;
+				refGeneNameExists = true;
+				break;
+			}	
+		}
+
+		if( refGeneNameExists == false )
+		{
+			fprintf( stderr, " Error: Reference gene name does not exist!\n");
+			return ( 1 );
+		}
+
+		string startCoord_g1;
+		
+		string endCoord_g1;
+
+		for(int i=0; i<strlen( (char * ) ref_genes[geneOnePos] ); i++)
+		{
+			string in = reinterpret_cast<char*>( ref_genes[geneOnePos] );
+
+			if( ref_genes[geneOnePos][i] == '\t' )
+				countTabs++;
+			if( countTabs == 1 )
+				chromosome_g1 +=  in[i] ;
+			if( countTabs == 2 )
+				startCoord_g1 += in[i] ;
+			if( countTabs == 3 )
+				endCoord_g1 += in[i] ;
+		}
+
+		trim( startCoord_g1 );
+		trim(endCoord_g1 );
+		trim(  chromosome_g1 );
+		start_genome_1 = atoi( startCoord_g1.c_str() );
+		end_genome_1 = atoi( endCoord_g1.c_str() );
+
+		if( prefix( chromosome_g1 , "CHR" ) == false )
+			chromosome_g1.insert( 0, "CHR" );
+	
+	}
+	else
+	{
+		start_genome_1 = sw . a;
+		end_genome_1 = sw . b;
+		if( prefix( chromosome_g1 , "CHR" ) == false )
+			chromosome_g1.insert( 0, "CHR" );
+		chromosome_g1.append( reinterpret_cast<char*>( sw . ref_chrom ) );
+	}
+	
+	
 	 
 
 	for(int i=0; i<num_seqs_e; i++)
@@ -750,7 +819,7 @@ int main(int argc, char **argv)
 			string c1 = "";
 			string c2 = "";
 
-				string in = reinterpret_cast<char*>( ref_exons[i] );
+			string in = reinterpret_cast<char*>( ref_exons[i] );
 			for(int j = 0; j<strlen( (char * ) ref_exons[i] ); j++)
 			{
 				if( ref_exons[i][j] == '\t' )
@@ -768,63 +837,78 @@ int main(int argc, char **argv)
 		}
 
 	}
-	
-	
-	string queryGeneName = reinterpret_cast<char*>(sw . query_gene_name );
 
-	for (i=0; i<queryGeneName.length(); i++)
-    		queryGeneName[i] = toupper( queryGeneName[i] );
-	queryGeneName.append( "\t" );
-
-	
-
-	bool queryGeneNameExists = false;
-	for(int i=0; i<num_seqs_j; i++)
-	{
-		
-		if( prefix(  reinterpret_cast<char*>(  query_genes[i] ) , queryGeneName ) == true )
-		{
-			geneTwoPos  = i;
-			queryGeneNameExists = true;
-			break;
-		}
-	}
-
-	if( queryGeneNameExists == false )
-	{
-		fprintf( stderr, " Error: Query gene name does not exist!\n");
-		return ( 1 );
-	}
-
-
-	countTabs = 0;
-	string startCoord_g2;
 	string chromosome_g2;
-	string endCoord_g2;
-	for(int i=0; i<strlen( (char * ) query_genes[geneTwoPos] ); i++)
+	string queryGeneName = to_string( sw . c );
+	queryGeneName.append( " - ");
+	queryGeneName.append( to_string( sw . d ) );
+	if( sw . query_gene_name != NULL )
 	{
+		queryGeneName = reinterpret_cast<char*>(sw . query_gene_name );
 
-		string in = reinterpret_cast<char*>(  query_genes[geneTwoPos] );
-		if( query_genes[geneTwoPos][i] == '\t' )
-			countTabs++;
-		if( countTabs == 1 )
-			chromosome_g2 += in[i] ;
-		if( countTabs == 2 )
-			startCoord_g2 += in[i] ;
-		if( countTabs == 3 )
-			endCoord_g2 += in[i] ;
-	}
+		for (i=0; i<queryGeneName.length(); i++)
+	    		queryGeneName[i] = toupper( queryGeneName[i] );
+		queryGeneName.append( "\t" );
 
-	trim( startCoord_g2 );
-	trim( endCoord_g2 );
-	trim(  chromosome_g2 );
 	
 
-	start_genome_2 = atoi( startCoord_g2.c_str() );
-	end_genome_2 = atoi( endCoord_g2.c_str() );
+		bool queryGeneNameExists = false;
+		for(int i=0; i<num_seqs_j; i++)
+		{
+		
+			if( prefix(  reinterpret_cast<char*>(  query_genes[i] ) , queryGeneName ) == true )
+			{
+				geneTwoPos  = i;
+				queryGeneNameExists = true;
+				break;
+			}
+		}
 
-	if( prefix( chromosome_g2, "CHR" ) == false )
-		chromosome_g2.insert( 0, "CHR" );
+		if( queryGeneNameExists == false )
+		{
+			fprintf( stderr, " Error: Query gene name does not exist!\n");
+			return ( 1 );
+		}
+
+
+		countTabs = 0;
+		string startCoord_g2;
+		
+		string endCoord_g2;
+		for(int i=0; i<strlen( (char * ) query_genes[geneTwoPos] ); i++)
+		{
+
+			string in = reinterpret_cast<char*>(  query_genes[geneTwoPos] );
+			if( query_genes[geneTwoPos][i] == '\t' )
+				countTabs++;
+			if( countTabs == 1 )
+				chromosome_g2 += in[i] ;
+			if( countTabs == 2 )
+				startCoord_g2 += in[i] ;
+			if( countTabs == 3 )
+				endCoord_g2 += in[i] ;
+		}
+
+		trim( startCoord_g2 );
+		trim( endCoord_g2 );
+		trim(  chromosome_g2 );
+	
+
+		start_genome_2 = atoi( startCoord_g2.c_str() );
+		end_genome_2 = atoi( endCoord_g2.c_str() );
+		
+		if( prefix( chromosome_g2, "CHR" ) == false )
+			chromosome_g2.insert( 0, "CHR" );
+	}
+	else
+	{
+		start_genome_2 = sw . c;
+		end_genome_2 = sw . d;
+		if( prefix( chromosome_g2, "CHR" ) == false )
+			chromosome_g2.insert( 0, "CHR" );
+		chromosome_g2.append( reinterpret_cast<char*>( sw . query_chrom ) );
+	}
+	
 	
 
 	for ( i = 0; i < num_seqs_g; i ++ )
@@ -997,17 +1081,55 @@ int main(int argc, char **argv)
 	free( ref_exons );
 	free( query_exons );
 
+	if( sw . a !=0 && start_genome_1 != sw . a )
+	{
+		fprintf( stderr, " Error: Start coordinate for reference is different to that of gene\n. Search by either gene name or coordinate.\n  ");
+		return ( 1 );
+	}
 
+	if( sw . b !=0 && end_genome_1 != sw . b )
+	{
+		fprintf( stderr, " Error: End coordinate for reference is different to that of gene\n. Search by either gene name or coordinate.\n  ");
+		return ( 1 );
+	}
+
+	
+	if( sw . c !=0 && start_genome_2 != sw . c )
+	{
+		fprintf( stderr, " Error: Start coordinate for query is different to that of gene\n. Search by either gene name or coordinate.\n"  );
+		return ( 1 );
+	}
+
+	
+	if( sw . d !=0 && end_genome_2 != sw . d )
+	{
+		fprintf( stderr, " Error: End coordinate for query is different to that of gene\n. Search by either gene name or coordinate.\n " );
+		return ( 1 );
+	}
+
+
+	if( sw . a > sw . b )
+	{
+		fprintf( stderr, " Error: Start coordinate of reference cannot be larger than end coordinate.\n " );
+		return ( 1 );
+	}
+	if( sw . c > sw . d )
+	{
+		fprintf( stderr, " Error: Start coordinate of query cannot be larger than end coordinate.\n"  );
+		return ( 1 );
+	}
+
+	
 	fprintf ( stderr, " Computing CNEs \n" );
 
 	ofstream new_ref;
 	new_ref.open("new_ref.fa");
-  	new_ref <<">"<<refGeneName<<"\n"<<ref<<"\n";
+  	new_ref <<">"<<"new_ref"<<"\n"<<ref<<"\n";
   	new_ref.close();  
 
 	ofstream new_query;
 	new_query.open("new_query.fa");
-  	new_query <<">"<<queryGeneName<<"\n"<<query<<"\n";
+  	new_query <<">"<<"new_query"<<"\n"<<query<<"\n";
   	new_query.close();  
 
 	vector<QGramOcc> * q_grams = new vector<QGramOcc>;
@@ -1074,7 +1196,7 @@ int main(int argc, char **argv)
 		return ( 1 );
 	}
 
-		
+
 	fprintf( out_fd, "%s%s%s%s%s%s%s\n", genome_one_filename, "\t", refGeneName.c_str(), "\t" , genome_two_filename,"\t", queryGeneName.c_str() );	
 	for ( int i = 0; i < mims->size(); i++ )
 	{
