@@ -807,9 +807,6 @@ int main(int argc, char **argv)
 			chromosome_g1.insert( 0, "CHR" );
 		chromosome_g1.append( reinterpret_cast<char*>( sw . ref_chrom ) );
 	}
-	
-	
-	 
 
 	for(int i=0; i<num_seqs_e; i++)
 	{
@@ -980,10 +977,10 @@ int main(int argc, char **argv)
 			break;
 		}
 	}
-	
+
 	if( g1Chromosome == false )
 	{
-		fprintf( stderr, " Error: Chromosome of gene %s not found in reference genome %s!\n", sw . n, sw . genome_one_filename );
+		fprintf( stderr, " Error: Chromosome %s not found in reference genome!\n", chromosome_g1.c_str() );
 		return ( 1 );
 	}
 
@@ -1002,7 +999,6 @@ int main(int argc, char **argv)
 	}
 	
 	
-
 	//Obtain query from genome2
 	bool g2Chromosome = false;
 	for(int i=0; i<num_seqs_q; i++)
@@ -1035,7 +1031,7 @@ int main(int argc, char **argv)
 
 	if( g2Chromosome == false )
 	{
-		fprintf( stderr, " Error: Chromosome of gene %s not found in reference genome %s!\n", sw . m, sw . genome_two_filename );
+		fprintf( stderr, " Error: Chromosome %s not found in reference genome!\n", chromosome_g2.c_str() );
 		return ( 1 );
 	}
 	
