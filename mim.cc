@@ -807,6 +807,7 @@ int main(int argc, char **argv)
 			chromosome_g1.insert( 0, "CHR" );
 		chromosome_g1.append( reinterpret_cast<char*>( sw . ref_chrom ) );
 	}
+	chromosome_g1.append( "\t" );
 
 	for(int i=0; i<num_seqs_e; i++)
 	{
@@ -905,8 +906,7 @@ int main(int argc, char **argv)
 			chromosome_g2.insert( 0, "CHR" );
 		chromosome_g2.append( reinterpret_cast<char*>( sw . query_chrom ) );
 	}
-	
-	
+	chromosome_g2.append( "\t" );
 
 	for ( i = 0; i < num_seqs_g; i ++ )
 	{
@@ -946,6 +946,43 @@ int main(int argc, char **argv)
 		}
 	}
 
+	if( sw . a !=0 && start_genome_1 != sw . a )
+	{
+		fprintf( stderr, " Error: Start coordinate for reference is different to that of gene\n. Search by either gene name or coordinate.\n  ");
+		return ( 1 );
+	}
+
+	if( sw . b !=0 && end_genome_1 != sw . b )
+	{
+		fprintf( stderr, " Error: End coordinate for reference is different to that of gene\n. Search by either gene name or coordinate.\n  ");
+		return ( 1 );
+	}
+
+	
+	if( sw . c !=0 && start_genome_2 != sw . c )
+	{
+		fprintf( stderr, " Error: Start coordinate for query is different to that of gene\n. Search by either gene name or coordinate.\n"  );
+		return ( 1 );
+	}
+
+	
+	if( sw . d !=0 && end_genome_2 != sw . d )
+	{
+		fprintf( stderr, " Error: End coordinate for query is different to that of gene\n. Search by either gene name or coordinate.\n " );
+		return ( 1 );
+	}
+
+
+	if( sw . a > sw . b )
+	{
+		fprintf( stderr, " Error: Start coordinate of reference cannot be larger than end coordinate.\n " );
+		return ( 1 );
+	}
+	if( sw . c > sw . d )
+	{
+		fprintf( stderr, " Error: Start coordinate of query cannot be larger than end coordinate.\n"  );
+		return ( 1 );
+	}
 
 	//Obtain reference from genome1;
 	
@@ -1076,45 +1113,6 @@ int main(int argc, char **argv)
 	free( genome2 );
 	free( ref_exons );
 	free( query_exons );
-
-	if( sw . a !=0 && start_genome_1 != sw . a )
-	{
-		fprintf( stderr, " Error: Start coordinate for reference is different to that of gene\n. Search by either gene name or coordinate.\n  ");
-		return ( 1 );
-	}
-
-	if( sw . b !=0 && end_genome_1 != sw . b )
-	{
-		fprintf( stderr, " Error: End coordinate for reference is different to that of gene\n. Search by either gene name or coordinate.\n  ");
-		return ( 1 );
-	}
-
-	
-	if( sw . c !=0 && start_genome_2 != sw . c )
-	{
-		fprintf( stderr, " Error: Start coordinate for query is different to that of gene\n. Search by either gene name or coordinate.\n"  );
-		return ( 1 );
-	}
-
-	
-	if( sw . d !=0 && end_genome_2 != sw . d )
-	{
-		fprintf( stderr, " Error: End coordinate for query is different to that of gene\n. Search by either gene name or coordinate.\n " );
-		return ( 1 );
-	}
-
-
-	if( sw . a > sw . b )
-	{
-		fprintf( stderr, " Error: Start coordinate of reference cannot be larger than end coordinate.\n " );
-		return ( 1 );
-	}
-	if( sw . c > sw . d )
-	{
-		fprintf( stderr, " Error: Start coordinate of query cannot be larger than end coordinate.\n"  );
-		return ( 1 );
-	}
-
 	
 	fprintf ( stderr, " Computing CNEs \n" );
 
