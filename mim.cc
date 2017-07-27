@@ -991,6 +991,7 @@ int main(int argc, char **argv)
 	{
 
 		string chromosome = reinterpret_cast<char*>(seq_id_genome1[i]);
+		chromosome.append( "\t" );
 
 		if( chromosome == chromosome_g1 )
 		{
@@ -1042,7 +1043,8 @@ int main(int argc, char **argv)
 	{
 
 		string chromosome = reinterpret_cast<char*>(seq_id_genome2[i]);
-
+		chromosome.append( "\t" );
+		
 		if( chromosome == chromosome_g2 )
 		{
 			query = ( unsigned char * ) calloc ( ( end_genome_2 - start_genome_2 + 1 ) , sizeof( unsigned char ) );
