@@ -149,90 +149,103 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 			
 
 			//Check if gap in ref or query contains $ 
+			bool ref$ = false;
 			for(int k= q_grams->at(current_qgram).occRef + q_grams->at(current_qgram).length; k<q_grams->at(j).occRef; k++)
 			{
 				if( ref[k] == '$' )
+				{
+					ref$ = true;
 					break;
-			}
 
-			for(int k= q_grams->at(current_qgram).occQuery + q_grams->at(current_qgram).length ; k<q_grams->at(j).occQuery; k++)
+				}
+			}	
+			
+			bool query$ = false;
+			for(int k= q_grams->at(current_qgram).occQuery + q_grams->at(current_qgram).length ; k<q_grams->at(j).occQuery ; k++)
 			{
 				if( query[k] == '$' )
-					break;
-			}
-
-			if( gap_size_ref == 0 && gap_size_query <= sw . k && gap_size_query > 0  )
-			{
-				if( edit_distance + gap_size_query <= sw . k )
 				{
-					edit_distance = edit_distance + gap_size_query;
-					q_end = q_grams->at(j).occQuery+ q_grams->at(j).length;
-					r_end =  q_grams->at(j).occRef + q_grams->at(j).length;
-			
-					current_qgram = j;
+					query$ = true;
+					break;
 				}
 			}
-			else if( gap_size_query == 0 && gap_size_ref <= sw . k && gap_size_ref > 0 ) 
+
+			if( query$ == false && ref$ == false )
 			{
-				if( edit_distance + gap_size_ref <= sw . k )
+				if( gap_size_ref == 0 && gap_size_query <= sw . k && gap_size_query > 0  )
 				{
-					edit_distance = edit_distance + gap_size_ref;
-					r_end = q_grams->at(j).occRef+ q_grams->at(j).length;
-					q_end =  q_grams->at(j).occQuery + q_grams->at(j).length; 
-					current_qgram = j;
-				}
-			}
-			else if( gap_size_query == 0 && gap_size_ref == 0 )
-			{	
-				r_end = q_grams->at(j).occRef + q_grams->at(j).length;
-				q_end = q_grams->at(j).occQuery + q_grams->at(j).length;
-				current_qgram = j;
-			}
-			else if ( gap_size_query > 0 && gap_size_ref > 0 )
-			{
-				if( abs( gap_size_query -  gap_size_ref ) > sw . k )
-					break;
-				
-				unsigned char * m_query = ( unsigned char * ) calloc ( gap_size_query + 1, sizeof ( unsigned char ) );
-				unsigned char * m_ref = ( unsigned char * ) calloc ( gap_size_ref + 1, sizeof ( unsigned char ) );
+					if( edit_distance + gap_size_query <= sw . k )
+					{
+						edit_distance = edit_distance + gap_size_query;
+						q_end = q_grams->at(j).occQuery+ q_grams->at(j).length;
+						r_end =  q_grams->at(j).occRef + q_grams->at(j).length;
 			
-				memcpy( &m_query[0], &query[ q_end ], gap_size_query );
-				memcpy( &m_ref[0], &ref[ r_end ] , gap_size_ref );
-
-				m_query[ gap_size_query ] = '\0';
-				m_ref[ gap_size_ref ] = '\0';
-
-				int matching_qgrams = compute_qgrams( m_ref, m_query );
-
-				if( ( ( strlen( ( char * ) ref ) + 1 - matching_qgrams) / 3 ) - 1 + edit_distance > sw . k )
+						current_qgram = j;
+					}
+				}
+				else if( gap_size_query == 0 && gap_size_ref <= sw . k && gap_size_ref > 0 ) 
+				{
+					if( edit_distance + gap_size_ref <= sw . k )
+					{
+						edit_distance = edit_distance + gap_size_ref;
+						r_end = q_grams->at(j).occRef+ q_grams->at(j).length;
+						q_end =  q_grams->at(j).occQuery + q_grams->at(j).length; 
+						current_qgram = j;
+					}
+				}
+				else if( gap_size_query == 0 && gap_size_ref == 0 )
 				{	
+					r_end = q_grams->at(j).occRef + q_grams->at(j).length;
+					q_end = q_grams->at(j).occQuery + q_grams->at(j).length;
+					current_qgram = j;
+				}
+				else if ( gap_size_query > 0 && gap_size_ref > 0 )
+				{	
+					if( abs( gap_size_query -  gap_size_ref ) > sw . k )
+						break;
+				
+					unsigned char * m_query = ( unsigned char * ) calloc ( gap_size_query + 1, sizeof ( unsigned char ) );
+					unsigned char * m_ref = ( unsigned char * ) calloc ( gap_size_ref + 1, sizeof ( unsigned char ) );
+			
+					memcpy( &m_query[0], &query[ q_end ], gap_size_query );
+					memcpy( &m_ref[0], &ref[ r_end ] , gap_size_ref );
+
+					m_query[ gap_size_query ] = '\0';
+					m_ref[ gap_size_ref ] = '\0';
+						
+					int matching_qgrams = compute_qgrams( m_ref, m_query );
+
+					if( ( ( strlen( ( char * ) ref ) + 1 - matching_qgrams) / 3 ) - 1 + edit_distance > sw . k )
+					{	
+						free( m_query );
+						free( m_ref );
+						continue;
+					}
+
+					int edit_distance_temp = edit_distance + editDistanceMyers( m_query, m_ref );
+
 					free( m_query );
 					free( m_ref );
-					continue;
+
+					if( edit_distance_temp <= sw . k )
+					{
+						edit_distance = edit_distance_temp;
+						r_end = q_grams->at(j).occRef + q_grams->at(j).length; 
+						q_end = q_grams->at(j).occQuery  + q_grams->at(j).length;
+						current_qgram = j;
+					}
 				}
+				
 
-				int edit_distance_temp = edit_distance + editDistanceMyers( m_query, m_ref );
-
-				free( m_query );
-				free( m_ref );
-
-				if( edit_distance_temp <= sw . k )
-				{
-					edit_distance = edit_distance_temp;
-					r_end = q_grams->at(j).occRef + q_grams->at(j).length; 
-					q_end = q_grams->at(j).occQuery  + q_grams->at(j).length;
-					current_qgram = j;
-				}
+				MimOcc occ;
+				occ.startRef = r_start;
+				occ.endRef = r_end;
+				occ.startQuery = q_start;
+				occ.endQuery = q_end;
+				occ.error = edit_distance;
+				mims->push_back(occ);
 			}
-		}	
-
-		MimOcc occ;
-		occ.startRef = r_start;
-		occ.endRef = r_end;
-		occ.startQuery = q_start;
-		occ.endQuery = q_end;
-		occ.error = edit_distance;
-		mims->push_back(occ);
+		}
 
 	}
 	return 0;
