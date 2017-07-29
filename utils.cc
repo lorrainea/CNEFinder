@@ -51,7 +51,7 @@ static struct option long_options[] =
    { "query-end",			optional_argument, NULL, 'd' },
    { "ref-chrom",                       optional_argument, NULL, 'y' },
    { "query-chrom",			optional_argument, NULL, 'z' },
-   { "repet-regions",			optional_argument, NULL, 'p' },
+   { "repeat-regions",			optional_argument, NULL, 'p' },
    { "help",                    	no_argument,       NULL, 'h' },
    { NULL,                      	0,                 NULL,  0  }
  };
@@ -304,7 +304,7 @@ void usage ( void )
    fprintf ( stdout, "    -d, --query-end		<int>		End CNE search at this position of query sequence.\n\n" );
 
    fprintf ( stdout, " Optional:\n" );
-   fprintf ( stdout, "  -p, --repet-regions		<int>		Choose 1 to filter repetitive regions of genomes or 0 otherwise. Default:1.\n");	
+   fprintf ( stdout, "  -p, --repeat-regions		<int>		Choose 1 to filter repetitive regions of genomes or 0 otherwise. Default:1.\n");	
    fprintf ( stdout, "  -v, --rev-complement		<int>		Choose 1 to compute CNEs for reverse complement or 0 otherwise. Default:0.\n");						
    fprintf ( stdout, "  -x, --remove-overlaps		<int>		Choose 1 to remove overlapping CNEs or 0 otherwise. Default:1.\n\n" );  
 

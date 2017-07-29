@@ -31,7 +31,7 @@ MIM: Maximal Inexact Matches
     -d, --query-end		<int>		End CNE search at this position of query sequence.
 
  Optional:
-  -p, --repet-regions		<int>		Choose 1 to filter repetitive regions of genomes or 0 otherwise. Default:1.	
+  -p, --repeat-regions		<int>		Choose 1 to filter repetitive regions of genomes or 0 otherwise. Default:1.	
   -v, --rev-complement		<int>		Choose 1 to compute CNEs for reverse complement or 0 otherwise. Default:0.
   -x, --remove-overlaps		<int>		Choose 1 to remove overlapping CNEs or 0 otherwise. Default:1.
 
