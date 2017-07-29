@@ -242,7 +242,11 @@ int main(int argc, char **argv)
 			}
 			if( c == '\n' || c == ' ' ) continue;
 
-			if ( islower(c) || c == NA ) c = '$';
+			if ( c == NA ) 
+				c = '$';
+			else if ( islower(c) && sw . p == 1 )
+				c = '$';
+			else c = toupper(c);
 
 			if ( seq_len >= max_alloc_seq_len )
 			{
@@ -345,7 +349,11 @@ int main(int argc, char **argv)
 			}
 			if( cq == '\n' || cq == ' ' ) continue;
 
-			if( islower( cq ) || cq == NA ) cq = '$';
+			if ( cq == NA ) 
+				cq = '$';
+			else if ( islower(cq) && sw . p == 1 )
+				cq = '$';
+			else cq = toupper(cq);
 
 			if ( seq_len_q >= max_alloc_seq_len_q )
 			{
