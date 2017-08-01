@@ -11,7 +11,7 @@ MIM: Maximal Inexact Matches
   -q, --query-genome-file	<str>		FASTA query genome filename.
   -e, --exons-ref-file		<str>		GTF/GFF exon coordinates for reference genome filename.
   -f, --exons-query-file	<str>		GTF/GFF exon coordinates for query genome filename.
-  -l, --min-seq-length		<int>		Minimum length of match.
+  -l, --min-seq-length		<int>		Minimum length of CNE.
   -k, --sim-threshold		<dbl>		Threshold of similarity between sequences.
   -o, --output-file		<str>		Output filename with CNEs identified.
 
@@ -23,7 +23,7 @@ MIM: Maximal Inexact Matches
     -m, --query-gene-name	<str>		Name of gene in query genome in which CNEs will be identified.
 
     2.Search using coordinates:
-    -y, --ref-chrom		<str>		Chromsome of reference genome.
+    -y, --ref-chrom		<str>		Chromosome of reference genome.
     -z, --query-chrom		<str>		Chromosome of query genome.
     -a, --ref-start		<int>		Start CNE search from this position of reference sequence.
     -b, --ref-end		<int>		End CNE search at this position of reference sequence.

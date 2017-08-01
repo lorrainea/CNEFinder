@@ -283,7 +283,7 @@ void usage ( void )
    fprintf ( stdout, "  -q, --query-genome-file	<str>		FASTA query genome filename.\n" );
    fprintf ( stdout, "  -e, --exons-ref-file		<str>		GTF/GFF exon coordinates for reference genome filename.\n" );
    fprintf ( stdout, "  -f, --exons-query-file	<str>		GTF/GFF exon coordinates for query genome filename.\n" );
-   fprintf ( stdout, "  -l, --min-seq-length		<int>		Minimum length of match.\n" );   
+   fprintf ( stdout, "  -l, --min-seq-length		<int>		Minimum length of CNE.\n" );   
    fprintf ( stdout, "  -k, --sim-threshold		<dbl>		Threshold of similarity between sequences.\n" );
    fprintf ( stdout, "  -o, --output-file		<str>		Output filename with CNEs identified.\n\n" ); 
 
@@ -296,7 +296,7 @@ void usage ( void )
    fprintf ( stdout, "    -m, --query-gene-name	<str>		Name of gene in query genome in which CNEs will be identified.\n\n" );
  
    fprintf ( stdout, "    2.Search using coordinates:\n" );
-   fprintf ( stdout, "    -y, --ref-chrom		<str>		Chromsome of reference genome.\n" );
+   fprintf ( stdout, "    -y, --ref-chrom		<str>		Chromosome of reference genome.\n" );
    fprintf ( stdout, "    -z, --query-chrom		<str>		Chromosome of query genome.\n" );
    fprintf ( stdout, "    -a, --ref-start		<int>		Start CNE search from this position of reference sequence.\n" );
    fprintf ( stdout, "    -b, --ref-end		<int>		End CNE search at this position of reference sequence.\n" );
