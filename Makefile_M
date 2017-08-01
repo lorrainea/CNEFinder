@@ -2,9 +2,9 @@ MF=     Makefile_M
  
 CC=     g++-7
  
-CFLAGS= -g -fopenmp -D_USE_OMP -msse4.2 -O3 -fomit-frame-pointer -funroll-loops  -c -std=c++11 -I ./ mim.cc 
+CFLAGS= -g -fopenmp -D_USE_OMP -msse4.2 -O3 -fomit-frame-pointer -funroll-loops  
  
-LFLAGS= -std=c++11 -I ./
+LFLAGS= -lm -I ./
  
 EXE=    mim
  
