@@ -234,18 +234,17 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 						q_end = q_grams->at(j).occQuery  + q_grams->at(j).length;
 						current_qgram = j;
 					}
-				}
-				
-
-				MimOcc occ;
-				occ.startRef = r_start;
-				occ.endRef = r_end;
-				occ.startQuery = q_start;
-				occ.endQuery = q_end;
-				occ.error = edit_distance;
-				mims->push_back(occ);
+				}	
 			}
 		}
+
+		MimOcc occ;
+		occ.startRef = r_start;
+		occ.endRef = r_end;
+		occ.startQuery = q_start;
+		occ.endQuery = q_end;
+		occ.error = edit_distance;
+		mims->push_back(occ);
 
 	}
 	return 0;
