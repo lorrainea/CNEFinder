@@ -150,23 +150,29 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 
 			//Check if gap in ref or query contains $ 
 			bool ref$ = false;
-			for(int k= q_grams->at(current_qgram).occRef + q_grams->at(current_qgram).length; k<q_grams->at(j).occRef; k++)
+			if( sw . p == 1 )
 			{
-				if( ref[k] == '$' )
+				for(int k= q_grams->at(current_qgram).occRef + q_grams->at(current_qgram).length; k<q_grams->at(j).occRef; k++)
 				{
-					ref$ = true;
-					break;
+					if( ref[k] == '$' )
+					{
+						ref$ = true;
+						break;
 
-				}
-			}	
+					}
+				}	
+			}
 			
 			bool query$ = false;
-			for(int k= q_grams->at(current_qgram).occQuery + q_grams->at(current_qgram).length ; k<q_grams->at(j).occQuery ; k++)
+			if( sw . p == 1 )
 			{
-				if( query[k] == '$' )
+				for(int k= q_grams->at(current_qgram).occQuery + q_grams->at(current_qgram).length ; k<q_grams->at(j).occQuery ; k++)
 				{
-					query$ = true;
-					break;
+					if( query[k] == '$' )
+					{
+						query$ = true;
+						break;
+					}
 				}
 			}
 
@@ -236,6 +242,7 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 					}
 				}	
 			}
+			else break;
 		}
 
 		MimOcc occ;
