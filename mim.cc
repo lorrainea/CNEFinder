@@ -734,6 +734,9 @@ int main(int argc, char **argv)
 	sw . k = sw . l - floor( sw . k * sw . l );
 	unsigned int q_gram_size =  sw . l /  ( sw . k + 1 ) ;
 
+	if( q_gram_size > 20 )
+		q_gram_size = 20;
+
 	int start_genome_1 = 0;
 	int end_genome_1 = 0;
 	int start_genome_2 = 0;
@@ -752,6 +755,7 @@ int main(int argc, char **argv)
 	string refGeneName = to_string( sw . a );
 	refGeneName.append( " - ");
 	refGeneName.append( to_string( sw . b ) );
+
 	if( sw . ref_gene_name != NULL )
 	{
 		refGeneName = reinterpret_cast<char*>( sw . ref_gene_name );
@@ -801,7 +805,11 @@ int main(int argc, char **argv)
 		trim(endCoord_g1 );
 		trim(  chromosome_g1 );
 		start_genome_1 = atoi( startCoord_g1.c_str() );
+		int diff = 0.005 * start_genome_1;
+		start_genome_1 = start_genome_1 - diff;
+
 		end_genome_1 = atoi( endCoord_g1.c_str() );
+		end_genome_1 = end_genome_1 + diff;
 
 		if( prefix( chromosome_g1 , "CHR" ) == false )
 			chromosome_g1.insert( 0, "CHR" );
@@ -901,7 +909,11 @@ int main(int argc, char **argv)
 	
 
 		start_genome_2 = atoi( startCoord_g2.c_str() );
+		int diff = 0.005 * start_genome_2;
+		start_genome_2 = start_genome_2 - diff;
+
 		end_genome_2 = atoi( endCoord_g2.c_str() );
+		end_genome_2 = end_genome_2 + diff;
 		
 		if( prefix( chromosome_g2, "CHR" ) == false )
 			chromosome_g2.insert( 0, "CHR" );
@@ -1013,6 +1025,12 @@ int main(int argc, char **argv)
 				return ( 1 );
 			}
 
+			if( start_genome_1 < 0 )
+				start_genome_1 = 0;
+		
+			if( end_genome_1 > strlen( (char *) genome1[i] ) )
+				end_genome_1 = strlen( (char *) genome1[i] ) - 1;
+
 			memcpy( &ref[0], &genome1[i][start_genome_1], end_genome_1 - start_genome_1 );
 			memcpy( &ref_id[0], &seq_id_genome1[i][0], strlen( ( char* ) seq_id_genome1[i] ));
 
@@ -1065,6 +1083,12 @@ int main(int argc, char **argv)
 				return ( 1 );
 			}
 
+			if( start_genome_2 < 0 )
+				start_genome_2 = 0;
+		
+			if( end_genome_2 > strlen( (char *) genome2[i] ) )
+				end_genome_2 = strlen( (char *) genome2[i] ) - 1;
+	
 			memcpy( &query[0], &genome2[i][start_genome_2], end_genome_2 - start_genome_2);
 			memcpy( &query_id[0], &seq_id_genome2[i][0], strlen( ( char* ) seq_id_genome2[i] ));
 
