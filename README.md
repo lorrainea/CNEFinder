@@ -39,7 +39,7 @@ MIM: Maximal Inexact Matches
   -T, --threads			<int>		Number of threads to use. Default:1. 
 ```
 
-See https://github.com/lorrainea/mim/wiki for more help.
+<b>See https://github.com/lorrainea/mim/wiki for more help.</b>
 
 <b>License</b>: GNU GPLv3 License; Copyright (C) 2017 Lorraine A. K. Ayad, Solon P. Pissis, Dimitris Polychronopoulos
 
