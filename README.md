@@ -1,7 +1,7 @@
 MIM: Maximal Inexact Matches
 ===
 
-<b>Description</b>: Given two genomes r and q, and a reference and query gene or coorindate valyes, MIM finds CNEs matches between either the positions of the provided genes or coordinate values of the respective chromosomes of r and q.
+<b>Description</b>: Given two genomes r and q, and a reference and query gene (or coordinate values), MIM finds CNE matches between either the positions of the provided genes or coordinate values of the respective chromosomes of r and q.
 
 <b>Installation</b>: To compile MIM, please follow the instructions given in file INSTALL.
 ```
