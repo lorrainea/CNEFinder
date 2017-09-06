@@ -13,7 +13,7 @@ MIM: Maximal Inexact Matches
   -f, --exons-query-file	<str>		GTF/GFF exon coordinates for query genome filename.
   -l, --min-seq-length		<int>		Minimum length of CNE.
   -k, --sim-threshold		<dbl>		Threshold of similarity between sequences.
-  -o, --output-file		<str>		Output filename with CNEs identified.
+  -o, --output-file		<str>		Output filename with CNEs identified in BED format.
 
   Either 1. or 2.
     1.Search using gene name:
