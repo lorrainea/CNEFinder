@@ -61,23 +61,32 @@ int find_maximal_inexact_matches( TSwitch sw, unsigned char * ref, unsigned char
 	fprintf ( stderr, " -Merging exact matches\n" );
 	merge( sw, ref, query, q_grams, mims );
 
+	
+
 	fprintf ( stderr, " -Extending merged matches\n" );
 	for( int i=0; i<mims->size(); i++ )
 	{
-		if( mims->at(i). error < sw . k )
+		if( mims->at(i). error < sw . k  &&  ( mims->at(i).endRef - mims->at(i).startRef > q_grams->at(i).length || mims->at(i).endRef - mims->at(i).startRef > sw . l )  )
 		{
 			extend( &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw );
 		}
 	}
 
 	
+
+
 	fprintf ( stderr, " -Adjusting extended matches\n" );
 	for( int j=0; j<mims->size(); j++ )
 	{
-		adjust(  &mims->at(j).error, (int*) &mims->at(j).startQuery, (int*) &mims->at(j).endQuery, (int*) &mims->at(j).startRef, (int*) &mims->at(j).endRef, ref, query, sw );
+		if(  mims->at(j).endRef - mims->at(j).startRef > q_grams->at(j).length || mims->at(j).endRef - mims->at(j).startRef > sw . l  )
+		{
+			adjust(  &mims->at(j).error, (int*) &mims->at(j).startQuery, (int*) &mims->at(j).endQuery, (int*) &mims->at(j).startRef, (int*) &mims->at(j).endRef, ref, query, sw );
+		}
+		
 
 	}
-
+	
+	q_grams->clear();
 	sort( mims->begin(), mims->end(), order );
 
 
@@ -221,13 +230,13 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 						
 					int matching_qgrams = compute_qgrams( m_ref, m_query );
 
-					if( ( ( strlen( ( char * ) ref ) + 1 - matching_qgrams) / 3 ) - 1 + edit_distance > sw . k )
+					/*if( ( ( strlen( ( char * ) ref ) + 1 - matching_qgrams) / 3 ) - 1 + edit_distance > sw . k )
 					{	
 						free( m_query );
 						free( m_ref );
 						continue;
-					}
-
+					}*/
+				
 					int edit_distance_temp = edit_distance + editDistanceMyers( m_query, m_ref );
 
 					free( m_query );
@@ -923,7 +932,7 @@ int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 	while( rSb != *r_start || rEb != *r_end || qSb != *q_start || qEb != *q_end )
 	{
 		int eD = *edit_distance;
-		
+
 		rSb = *r_start;
 		rEb = *r_end;
 		qSb = *q_start;
