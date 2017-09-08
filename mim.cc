@@ -756,6 +756,8 @@ int main(int argc, char **argv)
 	refGeneName.append( " - ");
 	refGeneName.append( to_string( sw . b ) );
 
+	// Obtaining start and end coordinate from gene name
+
 	if( sw . ref_gene_name != NULL )
 	{
 		refGeneName = reinterpret_cast<char*>( sw . ref_gene_name );
@@ -825,32 +827,7 @@ int main(int argc, char **argv)
 	}
 	chromosome_g1.append( "\t" );
 
-	for(int i=0; i<num_seqs_e; i++)
-	{
-		if( prefix( reinterpret_cast<char*>( ref_exons[i] ), chromosome_g1 ) == true )
-		{
-			countTabs = 0;
-			string c1 = "";
-			string c2 = "";
 
-			string in = reinterpret_cast<char*>( ref_exons[i] );
-			for(int j = 0; j<strlen( (char * ) ref_exons[i] ); j++)
-			{
-				if( ref_exons[i][j] == '\t' )
-					countTabs++;
-				if( countTabs == 1 )
-					c1 += in[j];
-				if( countTabs == 2 )
-					c2 += in[j] ;
-			}
-
-			trim( c1 );
-			trim( c2 );
-			exons_g1_start->push_back( atoi( c1.c_str() ) );
-			exons_g1_end->push_back( atoi( c2.c_str() ) );
-		}
-
-	}
 
 	string chromosome_g2;
 	string queryGeneName = to_string( sw . c );
@@ -865,7 +842,6 @@ int main(int argc, char **argv)
 		queryGeneName.append( "\t" );
 
 	
-
 		bool queryGeneNameExists = false;
 		for(int i=0; i<num_seqs_j; i++)
 		{
@@ -938,33 +914,6 @@ int main(int argc, char **argv)
 	}
 	free( ref_genes );
 	free( query_genes );
-	
-
-	for(int i=0; i<num_seqs_f; i++)
-	{
-		if( prefix( reinterpret_cast<char*>(query_exons[i]), chromosome_g2 ) == true )
-		{
-			countTabs = 0;
-			string c1;
-			string c2;
-			string in = reinterpret_cast<char*>(  query_exons[i] );
-
-			for(int j = 0; j<strlen( (char * ) query_exons[i] ); j++)
-			{
-				if( query_exons[i][j] == '\t' )
-					countTabs++;
-				if( countTabs == 1 )
-					c1 += in[j] ;
-				if( countTabs == 2 )
-					c2 += in[j] ;
-			}
-
-			trim( c1 );
-			trim( c2 );
-			exons_g2_start->push_back( atoi( c1.c_str() ) );
-			exons_g2_end->push_back( atoi( c2.c_str() ) );
-		}
-	}
 
 	if( sw . a !=0 && start_genome_1 != sw . a )
 	{
@@ -1002,6 +951,67 @@ int main(int argc, char **argv)
 	{
 		fprintf( stderr, " Error: Start coordinate of query cannot be larger than end coordinate.\n"  );
 		return ( 1 );
+	}
+	
+	//Obtaining exon coordinates
+
+	for(int i=0; i<num_seqs_e; i++)
+	{
+		if( prefix( reinterpret_cast<char*>( ref_exons[i] ), chromosome_g1 ) == true )
+		{
+			countTabs = 0;
+			string c1 = "";
+			string c2 = "";
+
+			string in = reinterpret_cast<char*>( ref_exons[i] );
+			for(int j = 0; j<strlen( (char * ) ref_exons[i] ); j++)
+			{
+				if( ref_exons[i][j] == '\t' )
+					countTabs++;
+				if( countTabs == 1 )
+					c1 += in[j];
+				if( countTabs == 2 )
+					c2 += in[j] ;
+			}
+
+			trim( c1 );
+			trim( c2 );
+			if( ( !( atoi( c2.c_str() ) < start_genome_1 )  && !(atoi( c1.c_str() ) > end_genome_1) ) )
+			{
+				exons_g1_start->push_back( atoi( c1.c_str() ) );
+				exons_g1_end->push_back( atoi( c2.c_str() ) );
+			}
+		}
+
+	}
+
+	for(int i=0; i<num_seqs_f; i++)
+	{
+		if( prefix( reinterpret_cast<char*>(query_exons[i]), chromosome_g2 ) == true )
+		{
+			countTabs = 0;
+			string c1;
+			string c2;
+			string in = reinterpret_cast<char*>(  query_exons[i] );
+
+			for(int j = 0; j<strlen( (char * ) query_exons[i] ); j++)
+			{
+				if( query_exons[i][j] == '\t' )
+					countTabs++;
+				if( countTabs == 1 )
+					c1 += in[j] ;
+				if( countTabs == 2 )
+					c2 += in[j] ;
+			}
+
+			trim( c1 );
+			trim( c2 );
+			if( ( !( atoi( c2.c_str() ) < start_genome_2 )  && !(atoi( c1.c_str() ) > end_genome_2) ) )
+			{
+				exons_g2_start->push_back( atoi( c1.c_str() ) );
+				exons_g2_end->push_back( atoi( c2.c_str() ) );
+			}
+		}
 	}
 
 	//Obtain reference from genome1;
@@ -1062,7 +1072,6 @@ int main(int argc, char **argv)
 		}
 	}
 	
-	
 	//Obtain query from genome2
 	bool g2Chromosome = false;
 	for(int i=0; i<num_seqs_q; i++)
@@ -1105,7 +1114,7 @@ int main(int argc, char **argv)
 		fprintf( stderr, " Error: Chromosome %s not found in reference genome!\n", chromosome_g2.c_str() );
 		return ( 1 );
 	}
-	
+
 	//removing exons from query
 
 	for(int i=0; i<exons_g2_start->size(); i++)
@@ -1118,7 +1127,7 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-	
+
 	delete( exons_g1_start );
 	delete( exons_g1_end );
 	delete( exons_g2_start );
