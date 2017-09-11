@@ -714,7 +714,7 @@ int main(int argc, char **argv)
 	}
 
 
-	if( sw . k < 0.5 )
+	if( sw . k < 0.7 )
 	{
 		fprintf( stderr, " Error: The similarity threshold cannot be less than 0.7!\n");
 		return ( 1 );	
