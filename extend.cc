@@ -1,5 +1,5 @@
 /**
-    MIM
+    CNEFinder
     Copyright (C) 2017 Lorraine A. K. Ayad, Solon P. Pissis, Dimitris Polychronopoulos
 
     This program is free software: you can redistribute it and/or modify
@@ -21,19 +21,17 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <stdlib.h>
+#include <algorithm>
 #include <vector>
 #include <unordered_map>
+#include <math.h> 
 #include <string.h>
 #include <sys/time.h>
 #include <omp.h>
-#include <seqan/sequence.h>
-#include <seqan/index.h>
-#include <seqan/align.h>
-#include "mim.h"
+#include "cnef.h"
 #include "edlib.h"
 
 using namespace std;
-using namespace seqan;
 
 bool order(MimOcc a, MimOcc b) 
 { 
@@ -60,32 +58,53 @@ int find_maximal_inexact_matches( TSwitch sw, unsigned char * ref, unsigned char
 
 	fprintf ( stderr, " -Merging exact matches\n" );
 	merge( sw, ref, query, q_grams, mims );
-
 	
-
 	fprintf ( stderr, " -Extending merged matches\n" );
 	for( int i=0; i<mims->size(); i++ )
 	{
-		if( mims->at(i). error < sw . k  &&  ( mims->at(i).endRef - mims->at(i).startRef > q_grams->at(i).length || mims->at(i).endRef - mims->at(i).startRef > sw . l )  )
+		double minLen = min(mims->at(i).endRef-mims->at(i).startRef,mims->at(i).endQuery-mims->at(i).startQuery);
+		int orig_start_ref = mims->at(i).startRef;
+		int orig_end_ref = mims->at(i).endRef;
+		int orig_start_query = mims->at(i).startQuery;
+		int orig_end_query = mims->at(i).endQuery;
+		int orig_ed = mims->at(i).error;
+
+		if( mims->at(i). error / minLen < sw . t )
 		{
 			extend( &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw );
-		}
-	}
-
-	
-
-
-	fprintf ( stderr, " -Adjusting extended matches\n" );
-	for( int j=0; j<mims->size(); j++ )
-	{
-		if(  mims->at(j).endRef - mims->at(j).startRef > q_grams->at(j).length || mims->at(j).endRef - mims->at(j).startRef > sw . l  )
-		{
-			adjust(  &mims->at(j).error, (int*) &mims->at(j).startQuery, (int*) &mims->at(j).endQuery, (int*) &mims->at(j).startRef, (int*) &mims->at(j).endRef, ref, query, sw );
-		}
 		
+			adjust(  &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw, 1 );
+		}
 
-	}
+		if(  min(mims->at(i).endRef-mims->at(i).startRef,mims->at(i).endQuery-mims->at(i).startQuery) < sw . l )
+		{
+			
+			mims->at(i).startRef = orig_start_ref;
+			mims->at(i).endRef = orig_end_ref;
+			mims->at(i).startQuery = orig_start_query;
+			mims->at(i).endQuery = orig_end_query;
+			mims->at(i).error = orig_ed;
+
+			alt_extend( &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw, 2 );
+
+			adjust(  &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw, 2 );
+		}
 	
+		if(  min(mims->at(i).endRef-mims->at(i).startRef,mims->at(i).endQuery-mims->at(i).startQuery) < sw . l )
+		{
+			mims->at(i).startRef = orig_start_ref;
+			mims->at(i).endRef = orig_end_ref;
+			mims->at(i).startQuery = orig_start_query;
+			mims->at(i).endQuery = orig_end_query;
+			mims->at(i).error = orig_ed;
+
+			alt_extend( &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw, 3 );
+
+			adjust(  &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw, 3 );
+		}
+			
+	}
+
 	q_grams->clear();
 	sort( mims->begin(), mims->end(), order );
 
@@ -147,6 +166,8 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 		int gap_size_ref = 0;
 		int gap_size_query = 0;
 
+		double minLen = min(r_end - r_start, q_end - q_start );
+
 		for( int j = i + 1; j<q_grams->size(); j++ )
 		{
 		
@@ -185,38 +206,44 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 				}
 			}
 
+			minLen = min(q_grams->at(j).occRef + q_grams->at(j).length - r_start, q_grams->at(j).occQuery+ q_grams->at(j).length - q_start );
 			if( query$ == false && ref$ == false )
 			{
-				if( gap_size_ref == 0 && gap_size_query <= sw . k && gap_size_query > 0  )
+				if( gap_size_ref == 0 && gap_size_query / minLen <= sw . t  && gap_size_query > 0  )
 				{
-					if( edit_distance + gap_size_query <= sw . k )
+					if( ( edit_distance + gap_size_query )/minLen  <= sw.t  )
 					{
 						edit_distance = edit_distance + gap_size_query;
 						q_end = q_grams->at(j).occQuery+ q_grams->at(j).length;
 						r_end =  q_grams->at(j).occRef + q_grams->at(j).length;
 			
 						current_qgram = j;
+						minLen = min(r_end - r_start, q_end - q_start );
 					}
 				}
-				else if( gap_size_query == 0 && gap_size_ref <= sw . k && gap_size_ref > 0 ) 
+				else if( gap_size_query == 0 && gap_size_ref/minLen <= sw.t && gap_size_ref > 0 ) 
 				{
-					if( edit_distance + gap_size_ref <= sw . k )
+					if( (edit_distance + gap_size_ref)/minLen <= sw.t  )
 					{
 						edit_distance = edit_distance + gap_size_ref;
 						r_end = q_grams->at(j).occRef+ q_grams->at(j).length;
 						q_end =  q_grams->at(j).occQuery + q_grams->at(j).length; 
+
 						current_qgram = j;
+						minLen = min(r_end - r_start, q_end - q_start );
 					}
 				}
 				else if( gap_size_query == 0 && gap_size_ref == 0 )
 				{	
 					r_end = q_grams->at(j).occRef + q_grams->at(j).length;
 					q_end = q_grams->at(j).occQuery + q_grams->at(j).length;
+
 					current_qgram = j;
+					minLen = min(r_end - r_start, q_end - q_start );
 				}
 				else if ( gap_size_query > 0 && gap_size_ref > 0 )
 				{	
-					if( abs( gap_size_query -  gap_size_ref ) > sw . k )
+					if( abs( gap_size_query -  gap_size_ref ) / minLen > sw.t )
 						break;
 				
 					unsigned char * m_query = ( unsigned char * ) calloc ( gap_size_query + 1, sizeof ( unsigned char ) );
@@ -228,7 +255,7 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 					m_query[ gap_size_query ] = '\0';
 					m_ref[ gap_size_ref ] = '\0';
 						
-					int matching_qgrams = compute_qgrams( m_ref, m_query );
+					//int matching_qgrams = compute_qgrams( m_ref, m_query );
 
 					/*if( ( ( strlen( ( char * ) ref ) + 1 - matching_qgrams) / 3 ) - 1 + edit_distance > sw . k )
 					{	
@@ -242,12 +269,14 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 					free( m_query );
 					free( m_ref );
 
-					if( edit_distance_temp <= sw . k )
+					if( edit_distance_temp/minLen <= sw.t  )
 					{
 						edit_distance = edit_distance_temp;
 						r_end = q_grams->at(j).occRef + q_grams->at(j).length; 
 						q_end = q_grams->at(j).occQuery  + q_grams->at(j).length;
+
 						current_qgram = j;
+						minLen = min(r_end - r_start, q_end - q_start );
 					}
 				}	
 			}
@@ -303,6 +332,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 	char operationEnd;
 	char operationStart;
 
+	double minLen = min( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
 	while( q_start_temp >= 0 || r_start_temp >= 0 || q_end_temp <=  strlen( ( char* ) yInput ) -1 || r_end_temp <=  strlen( ( char* ) xInput ) )
 	{
 
@@ -316,6 +346,8 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		char dRref;
 		char dRquery;
 
+		int maxLen = max(  strlen( ( char* ) yInput ),strlen( ( char* ) xInput ) );
+
 		if (  q_end_temp  < strlen( ( char* ) yInput )  &&  r_end_temp  < strlen( ( char* ) xInput ) ) 
 		{	
 			int editDist_S;
@@ -324,7 +356,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 
 			if( xInput[rE + toAddEndRef -1 ] == '$' || yInput[ qE + toAddEndQuery -1 ] == '$' )
 			{
-				editDist_S = sw . k + 1;
+				editDist_S = maxLen + 1;
 			}
 			else
 			{
@@ -346,7 +378,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 			if( toAddEndRef > 1 )
 			{
 				if( yInput[ qE + toAddEndQuery - 1] == '$' )
-					editDist_I = sw . k + 1;
+					editDist_I = maxLen + 1;
 				else
 				{
 					memcpy( &m_ref_R[0], &xInput[rE],  toAddEndRef  );
@@ -361,7 +393,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 				}
 	
 				if( xInput[ rE + toAddEndRef - 1] == '$' )
-					editDist_D = sw . k + 1;
+					editDist_D = maxLen + 1;
 				else
 				{
 					memcpy( &m_ref_R[0], &xInput[rE],  toAddEndRef  );
@@ -378,8 +410,8 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 			}
 			else
 			{
-				editDist_I = sw . k + 1;
-				editDist_D = sw . k + 1;
+				editDist_I = maxLen + 1;
+				editDist_D = maxLen + 1;
 			}
 
 			edit_distance_R =  min( editDist_S, min( editDist_I, editDist_D ) );
@@ -431,7 +463,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		else if( qE == strlen( ( char* ) yInput ) && rE != strlen( ( char* ) xInput ) && r_end_temp < strlen( ( char* ) xInput )  )
 		{
 			if( xInput[ r_end_temp + 1] == '$' )
-				edit_distance_R = sw . k + 1;
+				edit_distance_R = maxLen + 1;
 			else
 			{
 				edit_distance_R = edit_distance_total_R + 1;
@@ -445,7 +477,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		{
 			
 			if( yInput[ q_end_temp + 1] == '$' )
-				edit_distance_R = sw . k + 1;
+				edit_distance_R = maxLen + 1;
 			else
 			{
 				edit_distance_R = edit_distance_total_R + 1;
@@ -459,7 +491,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		{
 		
 			if( yInput[ qE + toAddEndQuery  -1 ] == '$' )
-				edit_distance_R = sw . k + 1;
+				edit_distance_R = maxLen + 1;
 			else
 			{
 				unsigned char * m_ref_R = ( unsigned char * ) calloc (  toAddEndRef + 1, sizeof ( unsigned char ) );
@@ -483,7 +515,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		else if ( q_end_temp  >= strlen( ( char* ) yInput ) - 1 && r_end_temp < strlen( ( char* ) xInput ) - 1 )	
 		{
 			if( xInput[ rE+toAddEndRef  -1 ] == '$' )
-				edit_distance_R = sw . k + 1;
+				edit_distance_R = maxLen + 1;
 			else
 			{
 				unsigned char * m_ref_R = ( unsigned char * ) calloc (  toAddEndRef + 1, sizeof ( unsigned char ) );
@@ -506,7 +538,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		}
 		else 
 		{	
-			edit_distance_R = sw . k + 1;
+			edit_distance_R = maxLen + 1;
 			rec = xInput[ strlen( ( char * ) xInput ) - 1 ];
 			qec = yInput[ strlen( ( char * ) yInput ) - 1 ];
 
@@ -531,7 +563,9 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 			
 
 			if( xInput [rS - toAddStartRef] == '$' || yInput [qS - toAddStartQuery] == '$' )
-				editDist_S  = sw . k +1;
+			{
+				editDist_S  = maxLen +1;
+			}	
 			else
 			{
 
@@ -553,7 +587,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 			{
 				if(  yInput [qS - toAddStartQuery] == '$' )
 				{
-					editDist_I  = sw . k +1;
+					editDist_I  = maxLen +1;
 				}
 				else
 				{
@@ -570,7 +604,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 
 
 				if( xInput [rS - toAddStartRef] == '$' )
-					editDist_D  = sw . k +1;
+					editDist_D  = maxLen +1;
 				else
 				{
 					memcpy( &m_ref_L[0], &xInput [rS - toAddStartRef], toAddStartRef );
@@ -586,10 +620,11 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 			}
 			else
 			{
-				editDist_I = sw . k + 1;
-				editDist_D = sw . k + 1;
+				editDist_I = maxLen + 1;
+				editDist_D = maxLen + 1;
 			}
 
+			
 			edit_distance_L =  min( editDist_S, min( editDist_I, editDist_D ) );
 
 			if( edit_distance_L == editDist_S && sLref == sLquery  )
@@ -636,7 +671,9 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		else if( qS == 0 && rS != 0 && r_start_temp > 0 )
 		{
 			if( xInput [r_start_temp - 1] == '$'  )
-				edit_distance_L  = sw . k +1;
+			{	
+				edit_distance_L  = maxLen +1;
+			}
 			else
 			{
 				edit_distance_L = edit_distance_total_L + 1;
@@ -649,7 +686,9 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		else if( rS == 0 && qS != 0 && q_start_temp > 0 )
 		{	
 			if( yInput [q_start_temp - 1] == '$'  )
-				edit_distance_L  = sw . k +1;
+			{	
+				edit_distance_L  = maxLen +1;
+			}
 			else
 			{
 				edit_distance_L = edit_distance_total_L + 1;
@@ -662,7 +701,9 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		else if ( q_start_temp  <= 0 && r_start_temp > 0 )	
 		{
 			if( xInput [rS - toAddStartRef] == '$'  )
-				edit_distance_L  = sw . k +1;
+			{
+				edit_distance_L  = maxLen +1;
+			}
 			else
 			{
 				unsigned char * m_ref_L = ( unsigned char * ) calloc ( toAddStartRef + 1, sizeof ( unsigned char ) );
@@ -687,7 +728,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		else if ( q_start_temp  > 0 && r_start_temp <= 0 )	
 		{	
 			if( yInput [qS - toAddStartQuery] == '$' )
-				edit_distance_L = sw . k + 1;
+				edit_distance_L = maxLen + 1;
 			else
 			{
 				unsigned char * m_ref_L = ( unsigned char * ) calloc ( toAddStartRef + 1, sizeof ( unsigned char ) );
@@ -713,15 +754,15 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		{	
 			rsc = xInput[0];
 			qsc = yInput[0];
-			edit_distance_L = sw . k + 1;
+			edit_distance_L = maxLen + 1;
 		}
 
 		
 		/*********************************************** computing extension *************************************************/
-		if( edit_distance_L + edit_distance_R + edit_distance_temp > sw . k )
+		int direction = 1;
+		if(  (edit_distance_L + edit_distance_R + edit_distance_temp) / (minLen+1) > sw .t )
 		{
-			
-			if( edit_distance_temp + edit_distance_total_R + edit_distance_L < edit_distance_temp + edit_distance_R + edit_distance_total_L  && edit_distance_temp + edit_distance_total_R + edit_distance_L <= sw . k ) //extend left
+			if(  edit_distance_temp + edit_distance_total_R + edit_distance_L < edit_distance_temp + edit_distance_R + edit_distance_total_L  && (edit_distance_temp + edit_distance_total_R + edit_distance_L ) / ( minLen+1 ) <= sw.t + sw.s ) //extend left
 			{
 				if( operationStart == 'S' )
 				{
@@ -729,6 +770,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 					r_start_temp--;
 					toAddStartQuery++;
 					toAddStartRef++;
+					
 				}
 				else if( operationStart == 'I' )
 				{
@@ -746,17 +788,18 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 				edit_distance_total_L = edit_distance_L;
 				edit_distance_updated = edit_distance_temp + edit_distance_total_R + edit_distance_L;
 
-				if( rsc == qsc )
-		{
+				minLen = min( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+				if( rsc == qsc && ( edit_distance_updated / minLen ) <= sw.t  )
+				{
 			
-			rs = r_start_temp;
-			qs = q_start_temp;
-		}
+					rs = r_start_temp;
+					qs = q_start_temp;
+				}
+				direction = 0;
+				
 		
-		
-					
 			}
-			else if ( edit_distance_temp + edit_distance_R + edit_distance_total_L <= edit_distance_temp + edit_distance_total_R + edit_distance_L && edit_distance_temp + edit_distance_R + edit_distance_total_L <= sw . k ) //extend right
+			else if (  edit_distance_temp + edit_distance_R + edit_distance_total_L < edit_distance_temp + edit_distance_total_R + edit_distance_L && (edit_distance_temp + edit_distance_R + edit_distance_total_L ) / ( minLen+1 ) <= sw .t + sw.s) //extend right
 			{
 				if( operationEnd == 'S' )
 				{
@@ -780,21 +823,93 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 				edit_distance_total_R = edit_distance_R;
 				edit_distance_updated = edit_distance_temp + edit_distance_R + edit_distance_total_L;
 
-					
-	
-		
-				if( rec == qec )
+				minLen = min( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+				if( rec == qec && edit_distance_updated/minLen <= sw.t)
 				{
 					re = r_end_temp;
 					qe = q_end_temp;
 				}
+				direction = 1;
+				
+			}
 
+			else if (  edit_distance_temp + edit_distance_R + edit_distance_total_L == edit_distance_temp + edit_distance_total_R + edit_distance_L && ( edit_distance_temp + edit_distance_R + edit_distance_total_L )/ ( minLen + 1 ) <=sw.t + sw.s) //extend based on previous extension
+			{
+				if( direction == 0 )
+				{
+					if( operationStart == 'S' )
+					{
+						q_start_temp--;
+						r_start_temp--;
+						toAddStartQuery++;
+						toAddStartRef++;
+					
+					}
+					else if( operationStart == 'I' )
+					{
+						toAddStartQuery++;
+						q_start_temp--;
+					}
+
+					else if( operationStart == 'D' )
+					{
+						toAddStartRef++;
+						r_start_temp--;
+					}
+
+			
+					edit_distance_total_L = edit_distance_L;
+					edit_distance_updated = edit_distance_temp + edit_distance_total_R + edit_distance_L;
+
+					minLen = min( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+					if( rsc == qsc && edit_distance_updated/minLen <=sw.t )
+					{
+			
+						rs = r_start_temp;
+						qs = q_start_temp;
+					}
+					direction = 0;
+				}
+				else if( direction == 1 )
+				{	
+					if( operationEnd == 'S' )
+					{
+						q_end_temp++;
+						r_end_temp++;
+						toAddEndQuery++;
+						toAddEndRef++;
+					}
+					else if( operationEnd == 'I' )
+					{		
+						toAddEndQuery++;
+
+						q_end_temp++;
+					}
+					else if( operationEnd == 'D' )
+					{	
+						toAddEndRef++;
+						r_end_temp++;
+					}
+
+					edit_distance_total_R = edit_distance_R;
+					edit_distance_updated = edit_distance_temp + edit_distance_R + edit_distance_total_L;
+
+					minLen = min( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+					if( rec == qec && edit_distance_updated/minLen <= sw.t)
+					{
+						re = r_end_temp;
+						qe = q_end_temp;
+					}
+					direction = 1;	
+				}
+				
 			}
 			else break;
 			
 		}
-		else if( edit_distance_temp +  edit_distance_L + edit_distance_R <= sw . k ) //extend both directions
+		else if( ( edit_distance_temp +  edit_distance_L + edit_distance_R)  / (minLen + 2)<= sw.t ) //extend both directions
 		{ 
+
 			if( operationEnd == 'S' )
 			{
 				q_end_temp++;
@@ -840,19 +955,22 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 			edit_distance_total_R = edit_distance_R;
 
 			edit_distance_updated =  edit_distance_temp + edit_distance_L + edit_distance_R;
+			minLen = min( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
 
-			if( rsc == qsc )
+			if( rsc == qsc && edit_distance_updated/minLen <= sw.t)
 			{
 			
 				rs = r_start_temp;
 				qs = q_start_temp;
 			}
 		
-			if( rec == qec )
+			if( rec == qec && edit_distance_updated/minLen <= sw.t )
 			{
 				re = r_end_temp;
 				qe = q_end_temp;
 			}
+
+			
 		}
 
 	}
@@ -878,7 +996,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 return 0;
 }
 
-int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_start, int * r_end, unsigned char * xInput, unsigned char * yInput, TSwitch sw )
+int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_start, int * r_end, unsigned char * xInput, unsigned char * yInput, TSwitch sw, int ext_type )
 {
 	int rS = *r_start;
 	int qS = *q_start;
@@ -903,11 +1021,17 @@ int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 	free( A );
 	free( B );
 
-	if( *edit_distance < sw . k )
+	
+	int minLen = min( rE - rS, qE - qS );
+	
+	if(  *edit_distance / minLen < sw.t ) 
 	{
 		int eD = *edit_distance;
 
-		extend( ( unsigned int*) &eD, (int*) &qS, (int*) &qE, (int*) &rS, (int*) &rE,  xInput, yInput, sw );
+		if( ext_type == 1 )
+			extend( ( unsigned int*) &eD, (int*) &qS, (int*) &qE, (int*) &rS, (int*) &rE,  xInput, yInput, sw );
+		else 
+			alt_extend( ( unsigned int*) &eD, (int*) &qS, (int*) &qE, (int*) &rS, (int*) &rE,  xInput, yInput, sw, ext_type );
 
 		*q_start = qS;
 		*q_end = qE;
@@ -932,13 +1056,16 @@ int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 	while( rSb != *r_start || rEb != *r_end || qSb != *q_start || qEb != *q_end )
 	{
 		int eD = *edit_distance;
-
+		
 		rSb = *r_start;
 		rEb = *r_end;
 		qSb = *q_start;
 		qEb = *q_end;
 
-		extend( ( unsigned int*) &eD, (int*) &qS, (int*) &qE, (int*) &rS, (int*) &rE,  xInput, yInput, sw );
+		if( ext_type == 1 )
+			extend( ( unsigned int*) &eD, (int*) &qS, (int*) &qE, (int*) &rS, (int*) &rE,  xInput, yInput, sw );
+		else 
+			alt_extend( ( unsigned int*) &eD, (int*) &qS, (int*) &qE, (int*) &rS, (int*) &rE,  xInput, yInput, sw, ext_type );
 
 		*q_start = qS;
 		*q_end = qE;
@@ -962,74 +1089,6 @@ int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 return 0;
 }
 
-template <typename TStringSet, typename TIndexSpec>
-int q_gram_counting(TStringSet &set, TIndexSpec )
-{
-
-	typedef String<char> TString;
-	typedef Index<TStringSet, TIndexSpec> TIndex;
-	typedef typename Fibre<TIndex, QGramCounts>::Type TCounts;
-	typedef typename Fibre<TIndex, QGramCountsDir>::Type TCountsDir;
-	typedef typename Value<TCountsDir>::Type TDirValue;
-	typedef typename Iterator<TCounts, Standard>::Type TIterCounts;
-	typedef typename Iterator<TCountsDir, Standard>::Type TIterCountsDir;
-
-	TIndex index(set);
-	indexRequire(index, QGramCounts());
-
-	int seqNum = countSequences(index);
-	Matrix<int, 2> distMat;
-	setLength(distMat, 0, seqNum);
-	setLength(distMat, 1, seqNum);
-	resize(distMat, 0);
-
-	int num_q_grams = 0;
-
-	TIterCountsDir itCountsDir = begin(indexCountsDir(index), Standard());
-	TIterCountsDir itCountsDirEnd = end(indexCountsDir(index), Standard());
-	TIterCounts itCountsBegin = begin(indexCounts(index), Standard());
-
-	TDirValue bucketBegin = *itCountsDir;
-	for(++itCountsDir; itCountsDir != itCountsDirEnd; ++itCountsDir)
-	{
-		TDirValue bucketEnd = *itCountsDir;
-
-		if (bucketBegin != bucketEnd)
-		{
-			TIterCounts itA = itCountsBegin + bucketBegin;
-			TIterCounts itEnd = itCountsBegin + bucketEnd;
-			for(; itA != itEnd; ++itA)
-				for(TIterCounts itB = itA; itB != itEnd; ++itB)
-					distMat((*itA).i1, (*itB).i1)  += _min((*itA).i2, (*itB).i2);
-		}
-		bucketBegin = bucketEnd;
-	}
-
-return distMat(0,1);
-}
-
-/*
-Count no of identical q-grams in 2 sequences implemented using SeqAn Library
-www.seqan.de
-*/
-int compute_qgrams( unsigned char * m_ref, unsigned char * m_query )
-{
-
-	typedef String<char> TString;
-
-	TString r = m_ref;
-	TString q = m_query;
-	StringSet<DnaString> stringSet;
-	reserve(stringSet, 2); //2 is number of sequences
-
-	appendValue(stringSet, r);
-	appendValue(stringSet, q);
-
-	int no_q_grams = q_gram_counting(stringSet, IndexQGram<UngappedShape<4>, OpenAddressing>() );
-
-return no_q_grams;
-}
-
 /*
 Myers Bit-Vector algorithm implemented using edlib Library
 */
@@ -1038,86 +1097,4 @@ int editDistanceMyers( unsigned char * xInput, unsigned char * yInput )
 	int score = edlibAlign( (const char*) xInput, strlen( (char*) xInput ), (const char*) yInput, strlen( (char*) yInput ), edlibDefaultAlignConfig()).editDistance;
 
 	return score;
-}
-
-
-/*
-Computes q-gram distance between two sequences
-*/
-int qGramDistance( unsigned char * m_ref, unsigned char * m_query )
-{
-	int q_gram_size;
-
-	if( min ( strlen( ( char * ) m_ref ) , strlen( ( char * ) m_query ) ) == 1 )
-		q_gram_size = 1;	
-
-	q_gram_size = 0.1 * min ( strlen( ( char * ) m_ref ) , strlen( ( char * ) m_query ) );
-
-	if( q_gram_size < 2 )
-		q_gram_size = 2;
-
-	if( q_gram_size > 5 )
-		q_gram_size = 5;
-
-	unordered_map<string, int> q_grams;
-	
-	
-	for (int i=0; i< strlen( ( char * ) m_ref ) - q_gram_size + 1; i++)
-	{
-		string qGram;
-		for(int j = i; j< i + q_gram_size; j++)
-		{
-			qGram = qGram + ( char ) m_ref[j];
-
-		}
-
-		unordered_map<string, int>::const_iterator pos = q_grams.find( qGram );
-		if( pos == q_grams.end() )
-		{
-			pair<string, int> toAdd ( qGram , 1 );
-			q_grams.insert( toAdd );
-		}
-		else 
-		{ 
-			int freq = pos->second + 1;
-			q_grams.erase( pos );   
-			pair<string, int> toAdd ( qGram , freq );
-
-			q_grams.insert( toAdd );
-		}
-	}
-
-
-	for (int i=0; i<strlen( ( char * ) m_query ) - q_gram_size + 1; i++)
-	{
-
-		string qGram;
-		for(int j = i; j< i + q_gram_size; j++)
-		{
-			qGram = qGram + ( char ) m_query[j];
-
-		}
-
-		unordered_map<string, int>::const_iterator pos = q_grams.find( qGram );
-		if( pos == q_grams.end() )
-		{
-			pair<string, int> toAdd ( qGram , -1 );
-			q_grams.insert( toAdd );
-		}
-		else 
-		{ 
-			int freq = pos->second - 1;
-			q_grams.erase (pos);   
-			pair<string, int> toAdd ( qGram , freq );
-
-			q_grams.insert( toAdd );
-		}
-	}
-
-	int qDist = 0;
-
-	for (unordered_map<string ,int>::iterator it=q_grams.begin(); it!=q_grams.end(); it++)
-		qDist = qDist + fabs( it->second );
-
-	return qDist;
 }

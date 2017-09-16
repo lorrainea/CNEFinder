@@ -1,5 +1,5 @@
 /**
-    MIM
+    CNEFinder
     Copyright (C) 2017 Lorraine A. K. Ayad, Solon P. Pissis, Dimitris Polychronopoulos
 
     This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@
 #include <sys/time.h>
 #include <getopt.h>
 #include <assert.h>
-#include "mim.h"
+#include "cnef.h"
 
 static struct option long_options[] =
  {
@@ -34,7 +34,8 @@ static struct option long_options[] =
    { "sec-genome-file",              	required_argument, NULL, 'q' },
    { "output-file",             	required_argument, NULL, 'o' },
    { "min-seq-length",          	required_argument, NULL, 'l' },
-   { "sim-threshold",          		required_argument, NULL, 'k' },
+   { "sim-threshold",          		required_argument, NULL, 't' },
+   { "ext-threshold",          		required_argument, NULL, 's' },
    { "threads", 			required_argument, NULL, 'T' },
    { "exons-file", 			required_argument, NULL, 'e' },
    { "ref-gene-file", 			optional_argument, NULL, 'g' },
@@ -73,7 +74,8 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
    sw -> genome_two_filename            = NULL;
    sw -> output_filename                = NULL;
    sw -> l                              = 50;
-   sw -> k				= 1.0;
+   sw -> t				= 1.0;
+   sw -> s				= 0.05;
    sw -> v				= 0;
    sw -> x				= 1;
    sw -> ref_genes_filename		= NULL;
@@ -92,7 +94,7 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
    sw -> T                              = 1;
    args = 0;
 
-   while ( ( opt = getopt_long ( argc, argv, "q:r:o:e:f:g:j:x:n:m:l:k:v:a:b:c:d:y:z:p:T:h", long_options, &oi ) ) != -1 ) 
+   while ( ( opt = getopt_long ( argc, argv, "q:r:o:e:f:g:j:x:n:m:l:t:s:v:a:b:c:d:y:z:p:T:h", long_options, &oi ) ) != -1 ) 
     {
 
       switch ( opt )
@@ -182,13 +184,22 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
            sw -> x = val;
            break;
 
-	case 'k':
+	case 't':
            val = atof( optarg );
            if ( optarg == ep )
             {
               return ( 0 );
             }
-           sw -> k = val;
+           sw -> t = val;
+           break;
+
+	case 's':
+           val = atof( optarg );
+           if ( optarg == ep )
+            {
+              return ( 0 );
+            }
+           sw -> s = val;
            break;
 
 	case 'v':
@@ -277,15 +288,15 @@ Usage of the tool
 */
 void usage ( void )
  {
-   fprintf ( stdout, " Usage: MIM <options>\n" );
+   fprintf ( stdout, " Usage: CNEFinder <options>\n" );
    fprintf ( stdout, " Standard (Mandatory):\n" );
    fprintf ( stdout, "  -r, --ref-genome-file		<str>		FASTA reference genome filename.\n" );
    fprintf ( stdout, "  -q, --query-genome-file	<str>		FASTA query genome filename.\n" );
    fprintf ( stdout, "  -e, --exons-ref-file		<str>		GTF/GFF exon coordinates for reference genome filename.\n" );
    fprintf ( stdout, "  -f, --exons-query-file	<str>		GTF/GFF exon coordinates for query genome filename.\n" );
    fprintf ( stdout, "  -l, --min-seq-length		<int>		Minimum length of CNE.\n" );   
-   fprintf ( stdout, "  -k, --sim-threshold		<dbl>		Threshold of similarity between sequences.\n" );
-   fprintf ( stdout, "  -o, --output-file		<str>		Output filename with CNEs identified in BED format.\n\n" ); 
+   fprintf ( stdout, "  -t, --sim-threshold		<dbl>		Threshold of similarity between sequences.\n" );
+   fprintf ( stdout, "  -o, --output-file		<str>		Output filename with CNEs identified.\n\n" ); 
 
    fprintf ( stdout, "  Either 1. or 2.\n" );
    fprintf ( stdout, "    1.Search using gene name:\n" );
@@ -304,6 +315,7 @@ void usage ( void )
    fprintf ( stdout, "    -d, --query-end		<int>		End CNE search at this position of query sequence.\n\n" );
 
    fprintf ( stdout, " Optional:\n" );
+   fprintf ( stdout, "  -s, --ext-threshold		<dbl>		Threshold to further extend similarity threshold by. Default:0.05.\n" );
    fprintf ( stdout, "  -p, --repeat-regions		<int>		Choose 1 to filter repetitive regions of genomes or 0 otherwise. Default:1.\n");	
    fprintf ( stdout, "  -v, --rev-complement		<int>		Choose 1 to compute CNEs for reverse complement or 0 otherwise. Default:0.\n");						
    fprintf ( stdout, "  -x, --remove-overlaps		<int>		Choose 1 to remove overlapping CNEs or 0 otherwise. Default:1.\n\n" );  
