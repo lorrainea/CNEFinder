@@ -3,7 +3,7 @@ CNEFinder: CNE Identifier
 
 <b>Description</b>: Given two genomes r and q, and a reference and query gene (or coordinate values), CNEFinder finds CNE matches between either the positions of the provided genes or coordinate values of the respective chromosomes of r and q.
 
-<b>Installation</b>: To compile MIM, please follow the instructions given in file INSTALL.
+<b>Installation</b>: To compile CNEFinder, please follow the instructions given in file INSTALL.
 ```
  Usage: CNEFinder <options>
  Standard (Mandatory):
