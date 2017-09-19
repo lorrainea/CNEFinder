@@ -75,33 +75,6 @@ int find_maximal_inexact_matches( TSwitch sw, unsigned char * ref, unsigned char
 		
 			adjust(  &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw, 1 );
 		}
-
-		if(  min(mims->at(i).endRef-mims->at(i).startRef,mims->at(i).endQuery-mims->at(i).startQuery) < sw . l )
-		{
-			
-			mims->at(i).startRef = orig_start_ref;
-			mims->at(i).endRef = orig_end_ref;
-			mims->at(i).startQuery = orig_start_query;
-			mims->at(i).endQuery = orig_end_query;
-			mims->at(i).error = orig_ed;
-
-			alt_extend( &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw, 2 );
-
-			adjust(  &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw, 2 );
-		}
-	
-		if(  min(mims->at(i).endRef-mims->at(i).startRef,mims->at(i).endQuery-mims->at(i).startQuery) < sw . l )
-		{
-			mims->at(i).startRef = orig_start_ref;
-			mims->at(i).endRef = orig_end_ref;
-			mims->at(i).startQuery = orig_start_query;
-			mims->at(i).endQuery = orig_end_query;
-			mims->at(i).error = orig_ed;
-
-			alt_extend( &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw, 3 );
-
-			adjust(  &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw, 3 );
-		}
 			
 	}
 
