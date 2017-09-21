@@ -217,6 +217,7 @@ extern "C" EdlibAlignResult edlibAlign(const char* const queryOriginal, const in
     if (alignData) delete alignData;
     //-------------------//
 
+    free ( result.endLocations );
     return result;
 }
 

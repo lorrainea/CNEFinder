@@ -1266,7 +1266,16 @@ int main(int argc, char **argv)
         free ( sw . genome_one_filename );
 	free ( sw . genome_two_filename );
         free ( sw . output_filename );
-	
+
+	free( sw . ref_exons_filename );
+	free( sw . query_exons_filename );
+	free( sw . ref_genes_filename );
+	free( sw . query_genes_filename );	
+	free( sw . ref_gene_name );
+	free( sw . query_gene_name );
+	free( sw . ref_chrom );
+	free( sw . query_chrom );
+
 return 1;
 }
 

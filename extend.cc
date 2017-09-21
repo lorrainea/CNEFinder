@@ -310,7 +310,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 	{
 
 		/************************************************ Score for extending right ***************************************************/
-		int edit_distance_R;
+		int edit_distance_R = 0;
 
 		char sRref;
 		char sRquery;
@@ -323,7 +323,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 
 		if (  q_end_temp  < strlen( ( char* ) yInput )  &&  r_end_temp  < strlen( ( char* ) xInput ) ) 
 		{	
-			int editDist_S;
+			int editDist_S = 0;
 			unsigned char * m_ref_R  = ( unsigned char * ) calloc (  toAddEndRef + 1, sizeof ( unsigned char ) );
 			unsigned char * m_query_R  = ( unsigned char * ) calloc ( toAddEndQuery + 1, sizeof ( unsigned char ) );
 
@@ -344,8 +344,8 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 				sRquery = m_query_R[toAddEndQuery -1];
 			}
 				
-			int editDist_I;
-			int editDist_D;
+			int editDist_I = 0;
+			int editDist_D = 0;
 			
 	
 			if( toAddEndRef > 1 )
@@ -519,7 +519,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 
 
 		/*********************************************** score for extending left *************************************************/
-		int edit_distance_L;
+		int edit_distance_L = 0;
 
 		char sLref;
 		char sLquery;
@@ -553,8 +553,8 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 				sLquery = m_query_L[0];
 			}
 
-			int editDist_I;
-			int editDist_D;
+			int editDist_I = 0;
+			int editDist_D = 0;
 
 			if( toAddStartRef > 1 )
 			{
