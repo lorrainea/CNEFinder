@@ -73,7 +73,7 @@ int find_maximal_inexact_matches( TSwitch sw, unsigned char * ref, unsigned char
 		{
 			extend( &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw );
 		
-			adjust(  &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw, 1 );
+			adjust(  &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw );
 		}
 			
 	}
@@ -969,7 +969,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 return 0;
 }
 
-int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_start, int * r_end, unsigned char * xInput, unsigned char * yInput, TSwitch sw, int ext_type )
+int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_start, int * r_end, unsigned char * xInput, unsigned char * yInput, TSwitch sw )
 {
 	int rS = *r_start;
 	int qS = *q_start;
@@ -1001,10 +1001,7 @@ int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 	{
 		int eD = *edit_distance;
 
-		if( ext_type == 1 )
-			extend( ( unsigned int*) &eD, (int*) &qS, (int*) &qE, (int*) &rS, (int*) &rE,  xInput, yInput, sw );
-		else 
-			alt_extend( ( unsigned int*) &eD, (int*) &qS, (int*) &qE, (int*) &rS, (int*) &rE,  xInput, yInput, sw, ext_type );
+		extend( ( unsigned int*) &eD, (int*) &qS, (int*) &qE, (int*) &rS, (int*) &rE,  xInput, yInput, sw );
 
 		*q_start = qS;
 		*q_end = qE;
@@ -1035,10 +1032,7 @@ int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		qSb = *q_start;
 		qEb = *q_end;
 
-		if( ext_type == 1 )
-			extend( ( unsigned int*) &eD, (int*) &qS, (int*) &qE, (int*) &rS, (int*) &rE,  xInput, yInput, sw );
-		else 
-			alt_extend( ( unsigned int*) &eD, (int*) &qS, (int*) &qE, (int*) &rS, (int*) &rE,  xInput, yInput, sw, ext_type );
+		extend( ( unsigned int*) &eD, (int*) &qS, (int*) &qE, (int*) &rS, (int*) &rE,  xInput, yInput, sw );
 
 		*q_start = qS;
 		*q_end = qE;
