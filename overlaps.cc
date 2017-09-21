@@ -25,7 +25,7 @@
 #include <sys/time.h>
 #include <algorithm>
 #include <omp.h>
-#include "mim.h"
+#include "cnef.h"
 
 using namespace std;
 
