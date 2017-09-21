@@ -40,7 +40,7 @@
 #include "boost/tokenizer.hpp"
 #include <sys/stat.h>
 #include "qgrams.h"
-#include "mim.h"
+#include "cnef.h"
 #include "file.h"
 #include "qlist.h"
 
