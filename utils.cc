@@ -34,6 +34,7 @@ static struct option long_options[] =
    { "sec-genome-file",              	required_argument, NULL, 'q' },
    { "output-file",             	required_argument, NULL, 'o' },
    { "min-seq-length",          	required_argument, NULL, 'l' },
+   { "max-seq-length",          	required_argument, NULL, 'u' },
    { "sim-threshold",          		required_argument, NULL, 't' },
    { "ext-threshold",          		required_argument, NULL, 's' },
    { "threads", 			required_argument, NULL, 'T' },
@@ -74,6 +75,7 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
    sw -> genome_two_filename            = NULL;
    sw -> output_filename                = NULL;
    sw -> l                              = 50;
+   sw -> u                              = 500;
    sw -> t				= 1.0;
    sw -> s				= 0.05;
    sw -> v				= 0;
@@ -94,7 +96,7 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
    sw -> T                              = 1;
    args = 0;
 
-   while ( ( opt = getopt_long ( argc, argv, "q:r:o:e:f:g:j:x:n:m:l:t:s:v:a:b:c:d:y:z:p:T:h", long_options, &oi ) ) != -1 ) 
+   while ( ( opt = getopt_long ( argc, argv, "q:r:o:e:f:g:j:x:n:m:l:u:t:s:v:a:b:c:d:y:z:p:T:h", long_options, &oi ) ) != -1 ) 
     {
 
       switch ( opt )
@@ -173,6 +175,16 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
               return ( 0 );
             }
            sw -> l = val;
+           break;
+
+	
+         case 'u':
+           val = strtol ( optarg, &ep, 10 );
+           if ( optarg == ep )
+            {
+              return ( 0 );
+            }
+           sw -> u = val;
            break;
 
 	  case 'x':
@@ -316,6 +328,7 @@ void usage ( void )
 
    fprintf ( stdout, " Optional:\n" );
    fprintf ( stdout, "  -s, --ext-threshold		<dbl>		Threshold to further extend similarity threshold by. Default:0.05.\n" );
+   fprintf ( stdout, "  -u, --max-seq-length		<int>		Set a maximum length for the CNE. Default:500.\n" ); 
    fprintf ( stdout, "  -p, --repeat-regions		<int>		Choose 1 to filter repetitive regions of genomes or 0 otherwise. Default:1.\n");	
    fprintf ( stdout, "  -v, --rev-complement		<int>		Choose 1 to compute CNEs for reverse complement or 0 otherwise. Default:0.\n");						
    fprintf ( stdout, "  -x, --remove-overlaps		<int>		Choose 1 to remove overlapping CNEs or 0 otherwise. Default:1.\n\n" );  

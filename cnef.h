@@ -48,7 +48,7 @@ struct TSwitch
    char               * ref_chrom;
    char               * query_chrom;
    double 		t, s;
-   int 			T, x, a, b, c, d, p;
+   int 			T, x, a, b, c, d, p, u;
    unsigned int         l, v;
    
  };

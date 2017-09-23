@@ -63,13 +63,9 @@ int find_maximal_inexact_matches( TSwitch sw, unsigned char * ref, unsigned char
 	for( int i=0; i<mims->size(); i++ )
 	{
 		double minLen = min(mims->at(i).endRef-mims->at(i).startRef,mims->at(i).endQuery-mims->at(i).startQuery);
-		int orig_start_ref = mims->at(i).startRef;
-		int orig_end_ref = mims->at(i).endRef;
-		int orig_start_query = mims->at(i).startQuery;
-		int orig_end_query = mims->at(i).endQuery;
-		int orig_ed = mims->at(i).error;
+		double maxLen = max(mims->at(i).endRef-mims->at(i).startRef,mims->at(i).endQuery-mims->at(i).startQuery);
 
-		if( mims->at(i). error / minLen < sw . t )
+		if( mims->at(i). error / minLen < sw . t && maxLen <= sw . u )
 		{
 			extend( &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw );
 		
@@ -140,12 +136,16 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 		int gap_size_query = 0;
 
 		double minLen = min(r_end - r_start, q_end - q_start );
+		double maxLen = max(r_end - r_start, q_end - q_start );
 
 		for( int j = i + 1; j<q_grams->size(); j++ )
 		{
 		
 			if( q_grams->at(j).occRef < q_grams->at(current_qgram).occRef )
 				continue;
+
+			if( maxLen >= sw . u )
+				break;
 
 			gap_size_ref = 	q_grams->at(j).occRef - ( q_grams->at(current_qgram).occRef + q_grams->at(current_qgram).length ); 
 			gap_size_query = q_grams->at(j).occQuery - ( q_grams->at(current_qgram).occQuery + q_grams->at(current_qgram).length );
@@ -180,9 +180,11 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 			}
 
 			minLen = min(q_grams->at(j).occRef + q_grams->at(j).length - r_start, q_grams->at(j).occQuery+ q_grams->at(j).length - q_start );
+			maxLen = max(q_grams->at(j).occRef + q_grams->at(j).length - r_start, q_grams->at(j).occQuery+ q_grams->at(j).length - q_start );
+
 			if( query$ == false && ref$ == false )
 			{
-				if( gap_size_ref == 0 && gap_size_query / minLen <= sw . t  && gap_size_query > 0  )
+				if( gap_size_ref == 0 && gap_size_query / minLen <= sw . t  && gap_size_query > 0 && maxLen <= sw . u  )
 				{
 					if( ( edit_distance + gap_size_query )/minLen  <= sw.t  )
 					{
@@ -192,9 +194,10 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 			
 						current_qgram = j;
 						minLen = min(r_end - r_start, q_end - q_start );
+						maxLen = max(r_end - r_start, q_end - q_start );
 					}
 				}
-				else if( gap_size_query == 0 && gap_size_ref/minLen <= sw.t && gap_size_ref > 0 ) 
+				else if( gap_size_query == 0 && gap_size_ref/minLen <= sw.t && gap_size_ref > 0 && maxLen <= sw . u) 
 				{
 					if( (edit_distance + gap_size_ref)/minLen <= sw.t  )
 					{
@@ -204,6 +207,7 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 
 						current_qgram = j;
 						minLen = min(r_end - r_start, q_end - q_start );
+						maxLen = max(r_end - r_start, q_end - q_start );
 					}
 				}
 				else if( gap_size_query == 0 && gap_size_ref == 0 )
@@ -213,8 +217,9 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 
 					current_qgram = j;
 					minLen = min(r_end - r_start, q_end - q_start );
+					maxLen = max(r_end - r_start, q_end - q_start );
 				}
-				else if ( gap_size_query > 0 && gap_size_ref > 0 )
+				else if ( gap_size_query > 0 && gap_size_ref > 0 && maxLen <= sw . u)
 				{	
 					if( abs( gap_size_query -  gap_size_ref ) / minLen > sw.t )
 						break;
@@ -250,6 +255,7 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 
 						current_qgram = j;
 						minLen = min(r_end - r_start, q_end - q_start );
+						maxLen = max(r_end - r_start, q_end - q_start );
 					}
 				}	
 			}
@@ -306,8 +312,12 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 	char operationStart;
 
 	double minLen = min( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+	double maxLen = max(r_end_temp - r_start_temp, q_end_temp - q_start_temp );
+
 	while( q_start_temp >= 0 || r_start_temp >= 0 || q_end_temp <=  strlen( ( char* ) yInput ) -1 || r_end_temp <=  strlen( ( char* ) xInput ) )
 	{
+		if( maxLen >= sw . u  )
+			break;
 
 		/************************************************ Score for extending right ***************************************************/
 		int edit_distance_R = 0;
@@ -319,7 +329,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		char dRref;
 		char dRquery;
 
-		int maxLen = max(  strlen( ( char* ) yInput ),strlen( ( char* ) xInput ) );
+		int maxSeq = max(  strlen( ( char* ) yInput ),strlen( ( char* ) xInput ) );
 
 		if (  q_end_temp  < strlen( ( char* ) yInput )  &&  r_end_temp  < strlen( ( char* ) xInput ) ) 
 		{	
@@ -329,7 +339,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 
 			if( xInput[rE + toAddEndRef -1 ] == '$' || yInput[ qE + toAddEndQuery -1 ] == '$' )
 			{
-				editDist_S = maxLen + 1;
+				editDist_S = maxSeq + 1;
 			}
 			else
 			{
@@ -351,7 +361,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 			if( toAddEndRef > 1 )
 			{
 				if( yInput[ qE + toAddEndQuery - 1] == '$' )
-					editDist_I = maxLen + 1;
+					editDist_I = maxSeq + 1;
 				else
 				{
 					memcpy( &m_ref_R[0], &xInput[rE],  toAddEndRef  );
@@ -366,7 +376,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 				}
 	
 				if( xInput[ rE + toAddEndRef - 1] == '$' )
-					editDist_D = maxLen + 1;
+					editDist_D = maxSeq + 1;
 				else
 				{
 					memcpy( &m_ref_R[0], &xInput[rE],  toAddEndRef  );
@@ -383,8 +393,8 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 			}
 			else
 			{
-				editDist_I = maxLen + 1;
-				editDist_D = maxLen + 1;
+				editDist_I = maxSeq + 1;
+				editDist_D = maxSeq + 1;
 			}
 
 			edit_distance_R =  min( editDist_S, min( editDist_I, editDist_D ) );
@@ -436,7 +446,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		else if( qE == strlen( ( char* ) yInput ) && rE != strlen( ( char* ) xInput ) && r_end_temp < strlen( ( char* ) xInput )  )
 		{
 			if( xInput[ r_end_temp + 1] == '$' )
-				edit_distance_R = maxLen + 1;
+				edit_distance_R = maxSeq + 1;
 			else
 			{
 				edit_distance_R = edit_distance_total_R + 1;
@@ -450,7 +460,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		{
 			
 			if( yInput[ q_end_temp + 1] == '$' )
-				edit_distance_R = maxLen + 1;
+				edit_distance_R = maxSeq + 1;
 			else
 			{
 				edit_distance_R = edit_distance_total_R + 1;
@@ -464,7 +474,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		{
 		
 			if( yInput[ qE + toAddEndQuery  -1 ] == '$' )
-				edit_distance_R = maxLen + 1;
+				edit_distance_R = maxSeq + 1;
 			else
 			{
 				unsigned char * m_ref_R = ( unsigned char * ) calloc (  toAddEndRef + 1, sizeof ( unsigned char ) );
@@ -488,7 +498,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		else if ( q_end_temp  >= strlen( ( char* ) yInput ) - 1 && r_end_temp < strlen( ( char* ) xInput ) - 1 )	
 		{
 			if( xInput[ rE+toAddEndRef  -1 ] == '$' )
-				edit_distance_R = maxLen + 1;
+				edit_distance_R = maxSeq + 1;
 			else
 			{
 				unsigned char * m_ref_R = ( unsigned char * ) calloc (  toAddEndRef + 1, sizeof ( unsigned char ) );
@@ -511,7 +521,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		}
 		else 
 		{	
-			edit_distance_R = maxLen + 1;
+			edit_distance_R = maxSeq + 1;
 			rec = xInput[ strlen( ( char * ) xInput ) - 1 ];
 			qec = yInput[ strlen( ( char * ) yInput ) - 1 ];
 
@@ -537,7 +547,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 
 			if( xInput [rS - toAddStartRef] == '$' || yInput [qS - toAddStartQuery] == '$' )
 			{
-				editDist_S  = maxLen +1;
+				editDist_S  = maxSeq +1;
 			}	
 			else
 			{
@@ -560,7 +570,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 			{
 				if(  yInput [qS - toAddStartQuery] == '$' )
 				{
-					editDist_I  = maxLen +1;
+					editDist_I  = maxSeq +1;
 				}
 				else
 				{
@@ -577,7 +587,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 
 
 				if( xInput [rS - toAddStartRef] == '$' )
-					editDist_D  = maxLen +1;
+					editDist_D  = maxSeq +1;
 				else
 				{
 					memcpy( &m_ref_L[0], &xInput [rS - toAddStartRef], toAddStartRef );
@@ -593,8 +603,8 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 			}
 			else
 			{
-				editDist_I = maxLen + 1;
-				editDist_D = maxLen + 1;
+				editDist_I = maxSeq + 1;
+				editDist_D = maxSeq + 1;
 			}
 
 			
@@ -645,7 +655,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		{
 			if( xInput [r_start_temp - 1] == '$'  )
 			{	
-				edit_distance_L  = maxLen +1;
+				edit_distance_L  = maxSeq +1;
 			}
 			else
 			{
@@ -660,7 +670,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		{	
 			if( yInput [q_start_temp - 1] == '$'  )
 			{	
-				edit_distance_L  = maxLen +1;
+				edit_distance_L  = maxSeq +1;
 			}
 			else
 			{
@@ -675,7 +685,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		{
 			if( xInput [rS - toAddStartRef] == '$'  )
 			{
-				edit_distance_L  = maxLen +1;
+				edit_distance_L  = maxSeq +1;
 			}
 			else
 			{
@@ -701,7 +711,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		else if ( q_start_temp  > 0 && r_start_temp <= 0 )	
 		{	
 			if( yInput [qS - toAddStartQuery] == '$' )
-				edit_distance_L = maxLen + 1;
+				edit_distance_L = maxSeq + 1;
 			else
 			{
 				unsigned char * m_ref_L = ( unsigned char * ) calloc ( toAddStartRef + 1, sizeof ( unsigned char ) );
@@ -727,7 +737,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		{	
 			rsc = xInput[0];
 			qsc = yInput[0];
-			edit_distance_L = maxLen + 1;
+			edit_distance_L = maxSeq + 1;
 		}
 
 		
@@ -762,6 +772,8 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 				edit_distance_updated = edit_distance_temp + edit_distance_total_R + edit_distance_L;
 
 				minLen = min( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+				maxLen = max( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+
 				if( rsc == qsc && ( edit_distance_updated / minLen ) <= sw.t  )
 				{
 			
@@ -797,6 +809,8 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 				edit_distance_updated = edit_distance_temp + edit_distance_R + edit_distance_total_L;
 
 				minLen = min( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+				maxLen = max( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+
 				if( rec == qec && edit_distance_updated/minLen <= sw.t)
 				{
 					re = r_end_temp;
@@ -834,7 +848,9 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 					edit_distance_total_L = edit_distance_L;
 					edit_distance_updated = edit_distance_temp + edit_distance_total_R + edit_distance_L;
 
-					minLen = min( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+					minLen = min( q_end_temp - q_start_temp, r_end_temp - r_start_temp );	
+					maxLen = max( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+
 					if( rsc == qsc && edit_distance_updated/minLen <=sw.t )
 					{
 			
@@ -868,6 +884,8 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 					edit_distance_updated = edit_distance_temp + edit_distance_R + edit_distance_total_L;
 
 					minLen = min( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+					maxLen = max( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+
 					if( rec == qec && edit_distance_updated/minLen <= sw.t)
 					{
 						re = r_end_temp;
@@ -880,7 +898,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 			else break;
 			
 		}
-		else if( ( edit_distance_temp +  edit_distance_L + edit_distance_R)  / (minLen + 2)<= sw.t ) //extend both directions
+		else if( ( edit_distance_temp +  edit_distance_L + edit_distance_R)  / (minLen + 2) <= sw.t ) //extend both directions
 		{ 
 
 			if( operationEnd == 'S' )
@@ -929,6 +947,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 
 			edit_distance_updated =  edit_distance_temp + edit_distance_L + edit_distance_R;
 			minLen = min( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
+			maxLen = max( q_end_temp - q_start_temp, r_end_temp - r_start_temp );
 
 			if( rsc == qsc && edit_distance_updated/minLen <= sw.t)
 			{
@@ -945,8 +964,8 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 
 			
 		}
-
 	}
+
 
 	if( qs < 0 )
 		*q_start = 0;
@@ -996,8 +1015,9 @@ int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 
 	
 	int minLen = min( rE - rS, qE - qS );
+	int maxLen = max( rE - rS, qE - qS );
 	
-	if(  *edit_distance / minLen < sw.t ) 
+	if(  *edit_distance / minLen < sw.t && maxLen < sw . u  ) 
 	{
 		int eD = *edit_distance;
 
