@@ -75,7 +75,7 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
    sw -> genome_two_filename            = NULL;
    sw -> output_filename                = NULL;
    sw -> l                              = 50;
-   sw -> u                              = 500;
+   sw -> u                              = 2000;
    sw -> t				= 1.0;
    sw -> s				= 0.05;
    sw -> v				= 0;
@@ -328,7 +328,7 @@ void usage ( void )
 
    fprintf ( stdout, " Optional:\n" );
    fprintf ( stdout, "  -s, --ext-threshold		<dbl>		Threshold to further extend similarity threshold by. Default:0.05.\n" );
-   fprintf ( stdout, "  -u, --max-seq-length		<int>		Set a maximum length for the CNE. Default:500.\n" ); 
+   fprintf ( stdout, "  -u, --max-seq-length		<int>		Set a maximum length for the CNE. Default:2000.\n" ); 
    fprintf ( stdout, "  -p, --repeat-regions		<int>		Choose 1 to filter repetitive regions of genomes or 0 otherwise. Default:1.\n");	
    fprintf ( stdout, "  -v, --rev-complement		<int>		Choose 1 to compute CNEs for reverse complement or 0 otherwise. Default:0.\n");						
    fprintf ( stdout, "  -x, --remove-overlaps		<int>		Choose 1 to remove overlapping CNEs or 0 otherwise. Default:1.\n\n" );  

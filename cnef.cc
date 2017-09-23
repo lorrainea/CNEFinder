@@ -173,6 +173,11 @@ int main(int argc, char **argv)
 		output_filename = sw . output_filename;
         }
 
+	if( sw . l > sw . u )
+	{
+		fprintf ( stderr, " Error: Minimum length of CNE cannot be greater than maximum length of CNE!\n" );
+		return ( 1 );
+	}
 	
 	/* Read the FASTA file for genome one in memory */
 	fprintf ( stderr, " Reading the file: %s\n", genome_one_filename );

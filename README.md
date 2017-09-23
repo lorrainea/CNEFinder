@@ -32,7 +32,7 @@ CNEFinder: CNE Identifier
 
  Optional:
   -s, --ext-threshold		<dbl>		Threshold to further extend similarity threshold by. Default:0.05.
-  -u, --max-seq-length		<int>		Set a maximum length for the CNE. Default:500.
+  -u, --max-seq-length		<int>		Set a maximum length for the CNE. Default:2000.
   -p, --repeat-regions		<int>		Choose 1 to filter repetitive regions of genomes or 0 otherwise. Default:1.	
   -v, --rev-complement		<int>		Choose 1 to compute CNEs for reverse complement or 0 otherwise. Default:0.
   -x, --remove-overlaps		<int>		Choose 1 to remove overlapping CNEs or 0 otherwise. Default:1.
