@@ -1160,6 +1160,8 @@ int main(int argc, char **argv)
 	}
 	free( genome1 );
 	free( genome2 );
+	free( seq_id_genome1 );
+	free( seq_id_genome2 );
 	free( ref_exons );
 	free( query_exons );
 	
