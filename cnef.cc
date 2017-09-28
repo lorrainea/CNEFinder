@@ -1247,7 +1247,7 @@ int main(int argc, char **argv)
 	{
 		if ( mims->at(i).endQuery - mims->at(i).startQuery >= sw . l || mims->at(i).endRef - mims->at(i).startRef >= sw . l )
 		{
-			fprintf( out_fd, "%s%s%i%s%i%s%s%s%i%s%i%s%i\n", chromosome_g1.c_str(), "\t", mims->at(i).startRef+start_genome_1, "\t", mims->at(i).endRef + start_genome_1, "\t" , chromosome_g2.c_str() , "\t", mims->at(i).startQuery+start_genome_2, "\t", mims->at(i).endQuery+start_genome_2,"\t",  mims->at(i).error );
+			fprintf( out_fd, "%s%s%i%s%i%s%s%s%i%s%i\n", chromosome_g1.c_str(), "\t", mims->at(i).startRef+start_genome_1, "\t", mims->at(i).endRef + start_genome_1, "\t" , chromosome_g2.c_str() , "\t", mims->at(i).startQuery+start_genome_2, "\t", mims->at(i).endQuery+start_genome_2 );
 		}		
 	}
 
