@@ -1,5 +1,5 @@
 /**
-    MIM
+    CNEFinder
     Copyright (C) 2017 Lorraine A. K. Ayad, Solon P. Pissis, Dimitris Polychronopoulos
 
     This program is free software: you can redistribute it and/or modify
