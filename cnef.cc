@@ -1241,8 +1241,13 @@ int main(int argc, char **argv)
 		return ( 1 );
 	}
 
+	
+	for(int i=0; i<chromosome_g1.length(); i++)
+		chromosome_g1[i] = tolower( chromosome_g1[i] );
+	for(int i=0; i<chromosome_g2.length(); i++)
+		chromosome_g2[i] = tolower( chromosome_g2[i] );
 
-	fprintf( out_fd, "%s%s%s%s%s%s%s\n", genome_one_filename, "\t", refGeneName.c_str(), "\t" , genome_two_filename,"\t", queryGeneName.c_str() );	
+	//fprintf( out_fd, "%s%s%s%s%s%s%s\n", genome_one_filename, "\t", refGeneName.c_str(), "\t" , genome_two_filename,"\t", queryGeneName.c_str() );	
 	for ( int i = 0; i < mims->size(); i++ )
 	{
 		if ( mims->at(i).endQuery - mims->at(i).startQuery >= sw . l || mims->at(i).endRef - mims->at(i).startRef >= sw . l )
