@@ -18,7 +18,7 @@ Basic Instructions
    for Mac Operating Systems.
 	 
    
-After compilation the binary `mim' will be created in the working 
+After compilation the binary `cnef' will be created in the working 
 directory, e.g. you may call it from this directory via
 
- S ./mim -h
+ S ./cnef
