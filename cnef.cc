@@ -192,6 +192,7 @@ int main(int argc, char **argv)
 	unsigned int max_alloc_seq_id = 0;
 	unsigned int max_alloc_seq = 0;
 	c = fgetc( gen1_fd );
+	unsigned int seq_len = 0;
 
 	do
 	{
@@ -232,7 +233,6 @@ int main(int argc, char **argv)
 			max_alloc_seq += ALLOC_SIZE;
 		}
 
-		unsigned int seq_len = 0;
 		unsigned int max_alloc_seq_len = 0;
 
 		genome1[ num_seqs ] = NULL;
@@ -275,12 +275,19 @@ int main(int argc, char **argv)
 		
 	} while( c != EOF );
 
-
 	genome1[ num_seqs ] = NULL;
+
+	if( seq_len < sw . b )
+		sw . b = seq_len;
 
 	if ( fclose ( gen1_fd ) )
 	{
 		fprintf( stderr, " Error: file close error!\n");
+		return ( 1 );
+	}
+	if ( sw . a < 0 )
+	{
+		fprintf( stderr, " Error: Reference start coordinate cannot be less than 0!\n");
 		return ( 1 );
 	}
 	/* Complete reading genome one */
@@ -299,6 +306,7 @@ int main(int argc, char **argv)
 	unsigned int max_alloc_seq_id_q = 0;
 	unsigned int max_alloc_seq_q = 0;
 	cq = fgetc( gen2_fd );
+	unsigned int seq_len_q = 0;
 
 	do
 	{
@@ -339,7 +347,6 @@ int main(int argc, char **argv)
 			max_alloc_seq_q += ALLOC_SIZE;
 		}
 
-		unsigned int seq_len_q = 0;
 		unsigned int max_alloc_seq_len_q = 0;
 
 		genome2[ num_seqs_q ] = NULL;
@@ -384,6 +391,15 @@ int main(int argc, char **argv)
 	} while( cq != EOF );
 
 	genome2[ num_seqs_q ] = NULL;
+
+	if( seq_len_q < sw . d )
+		sw .d = seq_len_q;
+
+	if ( sw . c < 0 )
+	{
+		fprintf( stderr, " Error: Query start coordinate cannot be less than 0!\n");
+		return ( 1 );
+	}
 
 	if ( fclose ( gen2_fd ) )
 	{
@@ -629,7 +645,6 @@ int main(int argc, char **argv)
 		return ( 1 );
 	}
 	/* Complete reading query exons file */
-
 
 	unsigned int num_seqs_j = 0; 
 	/* Read the query genes file */
