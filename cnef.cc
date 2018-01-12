@@ -307,7 +307,7 @@ int main(int argc, char **argv)
         unsigned int num_seqs_q = 0;       
 	unsigned int max_alloc_seq_id_q = 0;
 	unsigned int max_alloc_seq_q = 0;
-	max_len= 0;
+	unsigned int max_len2 = 0;
 
 	cq = fgetc( gen2_fd );
 
@@ -391,8 +391,8 @@ int main(int argc, char **argv)
 			genome2[ num_seqs_q ][ seq_len_q ] = '\0';
 			num_seqs_q++;
 
-			if( max_len < seq_len_q )
-				max_len = seq_len_q;
+			if( max_len2 < seq_len_q )
+				max_len2 = seq_len_q;
 
 		}
 		
@@ -400,7 +400,7 @@ int main(int argc, char **argv)
 
 	genome2[ num_seqs_q ] = NULL;
 
-	if( max_len < sw . d )
+	if( max_len2 < sw . d )
 		sw . d = max_len;
 
 
@@ -852,6 +852,8 @@ int main(int argc, char **argv)
 	chromosome_g1.append( "\t" );
 
 
+	if( sw . b == 0 )
+		sw . b = max_len;
 
 	string chromosome_g2;
 	string queryGeneName = to_string( sw . c );
@@ -928,6 +930,10 @@ int main(int argc, char **argv)
 	}
 	chromosome_g2.append( "\t" );
 
+	
+	if( sw . d == 0 )
+		sw . d = max_len2;
+
 	for ( i = 0; i < num_seqs_g; i ++ )
 	{
 		free ( ref_genes[i] );
@@ -966,14 +972,14 @@ int main(int argc, char **argv)
 	}
 
 
-	if( sw . a > sw . b )
+	if( sw . a >= sw . b && sw . a != 0 && sw . b !=0 )
 	{
-		fprintf( stderr, " Error: Start coordinate of reference cannot be larger than end coordinate.\n " );
+		fprintf( stderr, " Error: Start coordinate of reference must be smaller than end coordinate.\n " );
 		return ( 1 );
 	}
-	if( sw . c > sw . d )
+	if( sw . c >= sw . d && sw . c != 0 && sw . d !=0 )
 	{
-		fprintf( stderr, " Error: Start coordinate of query cannot be larger than end coordinate.\n"  );
+		fprintf( stderr, " Error: Start coordinate of query must be smaller than end coordinate.\n"  );
 		return ( 1 );
 	}
 	
@@ -1000,6 +1006,13 @@ int main(int argc, char **argv)
 
 			trim( c1 );
 			trim( c2 );
+
+			if( !isdigit( atoi(c1.c_str()) ) || !isdigit( atoi(c2.c_str()) )  ) 
+			{
+				fprintf( stderr, " Error: Exon file format is incorrect.\n"  );
+				return ( 1 );
+			}
+
 			if( ( !( atoi( c2.c_str() ) < start_genome_1 )  && !(atoi( c1.c_str() ) > end_genome_1) ) )
 			{
 				exons_g1_start->push_back( atoi( c1.c_str() ) );
@@ -1030,6 +1043,13 @@ int main(int argc, char **argv)
 
 			trim( c1 );
 			trim( c2 );
+	
+			if( !isdigit( atoi(c1.c_str()) ) || !isdigit( atoi(c2.c_str()) )  ) 
+			{
+				fprintf( stderr, " Error: Exon file format is incorrect.\n"  );
+				return ( 1 );
+			}
+
 			if( ( !( atoi( c2.c_str() ) < start_genome_2 )  && !(atoi( c1.c_str() ) > end_genome_2) ) )
 			{
 				exons_g2_start->push_back( atoi( c1.c_str() ) );
