@@ -67,10 +67,7 @@ int main(int argc, char **argv)
 	unsigned char ** ref_exons = NULL;   
 
 	unsigned char ** query_genes = NULL;     	
-	unsigned char ** query_exons = NULL;  
-
-	unsigned char * first_genome = NULL;     	
-	unsigned char * second_genome = NULL;  
+	unsigned char ** query_exons = NULL;   
 
 	unsigned int    i, j;
 	unsigned int    q, l;
@@ -193,8 +190,6 @@ int main(int argc, char **argv)
 	unsigned int max_alloc_seq = 0;
 	c = fgetc( gen1_fd );
 
-	unsigned int max_len = 0;
-
 	do
 	{
 		if ( c != '>' )
@@ -274,18 +269,11 @@ int main(int argc, char **argv)
 			genome1[ num_seqs ][ seq_len ] = '\0';
 			num_seqs++;	
 
-			if( max_len < seq_len )
-				max_len = seq_len;
 		}
 		
 	} while( c != EOF );
 
 	genome1[ num_seqs ] = NULL;
-
-	if( max_len < sw . b )
-		sw . b = max_len;
-
-
 
 	if ( fclose ( gen1_fd ) )
 	{
@@ -307,7 +295,6 @@ int main(int argc, char **argv)
         unsigned int num_seqs_q = 0;       
 	unsigned int max_alloc_seq_id_q = 0;
 	unsigned int max_alloc_seq_q = 0;
-	unsigned int max_len2 = 0;
 
 	cq = fgetc( gen2_fd );
 
@@ -390,19 +377,11 @@ int main(int argc, char **argv)
 			}
 			genome2[ num_seqs_q ][ seq_len_q ] = '\0';
 			num_seqs_q++;
-
-			if( max_len2 < seq_len_q )
-				max_len2 = seq_len_q;
-
 		}
 		
 	} while( cq != EOF );
 
 	genome2[ num_seqs_q ] = NULL;
-
-	if( max_len2 < sw . d )
-		sw . d = max_len;
-
 
 	if ( fclose ( gen2_fd ) )
 	{
@@ -851,10 +830,6 @@ int main(int argc, char **argv)
 	}
 	chromosome_g1.append( "\t" );
 
-
-	if( sw . b == 0 )
-		sw . b = max_len;
-
 	string chromosome_g2;
 	string queryGeneName = to_string( sw . c );
 	queryGeneName.append( " - ");
@@ -929,10 +904,6 @@ int main(int argc, char **argv)
 		chromosome_g2.append( reinterpret_cast<char*>( sw . query_chrom ) );
 	}
 	chromosome_g2.append( "\t" );
-
-	
-	if( sw . d == 0 )
-		sw . d = max_len2;
 
 	for ( i = 0; i < num_seqs_g; i ++ )
 	{
@@ -1069,6 +1040,10 @@ int main(int argc, char **argv)
 
 		if( chromosome == chromosome_g1 )
 		{
+
+			sw . b =  strlen( ( char* ) genome1[i] ) - 1;
+			end_genome_1 = sw . b;
+
 			ref = ( unsigned char * ) calloc ( ( end_genome_1 - start_genome_1 + 1 ) , sizeof( unsigned char ) );
 			ref_id = ( unsigned char * ) calloc ( ( strlen( ( char* ) seq_id_genome1[i] ) + 1 ) , sizeof( unsigned char ) );
 
@@ -1126,6 +1101,10 @@ int main(int argc, char **argv)
 		
 		if( chromosome == chromosome_g2 )
 		{
+
+			sw . d =  strlen( ( char* ) genome2[i] ) - 1;
+			end_genome_2 = sw . d;
+		
 			query = ( unsigned char * ) calloc ( ( end_genome_2 - start_genome_2 + 1 ) , sizeof( unsigned char ) );
 			query_id = ( unsigned char * ) calloc ( ( strlen( ( char* ) seq_id_genome2[i] ) + 1 ) , sizeof( unsigned char ) );
 
