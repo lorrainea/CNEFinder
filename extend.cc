@@ -262,13 +262,17 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 			else break;
 		}
 
-		MimOcc occ;
-		occ.startRef = r_start;
-		occ.endRef = r_end;
-		occ.startQuery = q_start;
-		occ.endQuery = q_end;
-		occ.error = edit_distance;
-		mims->push_back(occ);
+
+		if( max( r_end - r_start, q_end - q_start ) <= sw . u)
+		{
+			MimOcc occ;
+			occ.startRef = r_start;
+			occ.endRef = r_end;
+			occ.startQuery = q_start;
+			occ.endQuery = q_end;
+			occ.error = edit_distance;
+			mims->push_back(occ);
+		}
 
 	}
 	return 0;
@@ -976,6 +980,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 	else *r_start = rs;
 
 	*edit_distance = edit_distance_updated;
+
 	
 	if( qe > strlen( ( char* ) yInput ) )
 		*q_end =  strlen( ( char* ) yInput );
@@ -1017,7 +1022,7 @@ int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 	int minLen = min( rE - rS, qE - qS );
 	int maxLen = max( rE - rS, qE - qS );
 	
-	if(  *edit_distance / minLen < sw.t && maxLen < sw . u  ) 
+	if(  *edit_distance / minLen < sw.t && maxLen <= sw . u  ) 
 	{
 		int eD = *edit_distance;
 

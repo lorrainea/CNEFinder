@@ -807,7 +807,7 @@ int main(int argc, char **argv)
 		}
 
 		trim( startCoord_g1 );
-		trim(endCoord_g1 );
+		trim( endCoord_g1 );
 		trim(  chromosome_g1 );
 		start_genome_1 = atoi( startCoord_g1.c_str() );
 		int diff = 0.005 * start_genome_1;
@@ -978,10 +978,22 @@ int main(int argc, char **argv)
 			trim( c1 );
 			trim( c2 );
 
-			if( !isdigit( atoi(c1.c_str()) ) || !isdigit( atoi(c2.c_str()) )  ) 
+			for(int k = 0; k<c1.length(); k++)
 			{
-				fprintf( stderr, " Error: Exon file format is incorrect.\n"  );
-				return ( 1 );
+				if( !isdigit( c1[k] ) ) 
+				{	
+					fprintf( stderr, " Error: Reference exon file format is incorrect.\n"  );
+					return ( 1 );
+				}
+			}
+
+			for(int k=0; k<c2.length(); k++ )	
+			{
+				if( !isdigit(  c2[k] ) ) 
+				{
+					fprintf( stderr, " Error: Reference exon file format is incorrect.\n"  );
+					return ( 1 );
+				}
 			}
 
 			if( ( !( atoi( c2.c_str() ) < start_genome_1 )  && !(atoi( c1.c_str() ) > end_genome_1) ) )
@@ -1015,10 +1027,22 @@ int main(int argc, char **argv)
 			trim( c1 );
 			trim( c2 );
 	
-			if( !isdigit( atoi(c1.c_str()) ) || !isdigit( atoi(c2.c_str()) )  ) 
+			for(int k = 0; k<c1.length(); k++)
 			{
-				fprintf( stderr, " Error: Exon file format is incorrect.\n"  );
-				return ( 1 );
+				if( !isdigit( c1[k] ) )
+				{
+					fprintf( stderr, " Error: Query exon file format is incorrect.\n"  );
+					return ( 1 );
+				}
+			}
+
+			for(int k=0; k<c2.length(); k++ )	
+			{
+				if( !isdigit( c2[k] ) ) 
+				{
+					fprintf( stderr, " Error: Query exon file format is incorrect.\n"  );
+					return ( 1 );
+				}
 			}
 
 			if( ( !( atoi( c2.c_str() ) < start_genome_2 )  && !(atoi( c1.c_str() ) > end_genome_2) ) )
@@ -1041,7 +1065,9 @@ int main(int argc, char **argv)
 		if( chromosome == chromosome_g1 )
 		{
 
-			sw . b =  strlen( ( char* ) genome1[i] ) - 1;
+			if( sw . b == 0 )
+				sw . b =  strlen( ( char* ) genome1[i] ) - 1;
+
 			end_genome_1 = sw . b;
 
 			ref = ( unsigned char * ) calloc ( ( end_genome_1 - start_genome_1 + 1 ) , sizeof( unsigned char ) );
@@ -1101,8 +1127,8 @@ int main(int argc, char **argv)
 		
 		if( chromosome == chromosome_g2 )
 		{
-
-			sw . d =  strlen( ( char* ) genome2[i] ) - 1;
+			if( sw . d == 0 )
+				sw . d =  strlen( ( char* ) genome2[i] ) - 1;
 			end_genome_2 = sw . d;
 		
 			query = ( unsigned char * ) calloc ( ( end_genome_2 - start_genome_2 + 1 ) , sizeof( unsigned char ) );
@@ -1264,12 +1290,21 @@ int main(int argc, char **argv)
 	for(int i=0; i<chromosome_g2.length(); i++)
 		chromosome_g2[i] = tolower( chromosome_g2[i] );
 
+	trim( chromosome_g1 );
+	trim( chromosome_g2 );
+
 	//fprintf( out_fd, "%s%s%s%s%s%s%s\n", genome_one_filename, "\t", refGeneName.c_str(), "\t" , genome_two_filename,"\t", queryGeneName.c_str() );	
 	for ( int i = 0; i < mims->size(); i++ )
 	{
 		if ( mims->at(i).endQuery - mims->at(i).startQuery >= sw . l || mims->at(i).endRef - mims->at(i).startRef >= sw . l )
 		{
-			fprintf( out_fd, "%s%s%i%s%i%s%s%s%i%s%i\n", chromosome_g1.c_str(), "\t", mims->at(i).startRef+start_genome_1, "\t", mims->at(i).endRef + start_genome_1, "\t" , chromosome_g2.c_str() , "\t", mims->at(i).startQuery+start_genome_2, "\t", mims->at(i).endQuery+start_genome_2 );
+			double score = scoring( mims->at(i), ref, query );
+
+			unsigned int minLen = min( mims->at(i).endQuery - mims->at(i).startQuery, mims->at(i).endRef - mims->at(i).startRef);
+
+			double threshold = (1.0 - (mims->at(i).error*1.0/minLen*1.0))*100.0;
+
+			fprintf( out_fd, "%s%s%i%s%i%s%s%s%i%s%i%s%i%s%i%s%.2f%s%.2f\n", chromosome_g1.c_str(), "\t", mims->at(i).startRef+start_genome_1, "\t", mims->at(i).endRef + start_genome_1, "\t" , chromosome_g2.c_str() , "\t", mims->at(i).startQuery+start_genome_2, "\t", mims->at(i).endQuery+start_genome_2, "\t", mims->at(i).endRef - mims->at(i).startRef, "\t", mims->at(i).endQuery - mims->at(i).startQuery  ,"\t", threshold, "\t", score );
 		}		
 	}
 
