@@ -1298,13 +1298,12 @@ int main(int argc, char **argv)
 	{
 		if ( mims->at(i).endQuery - mims->at(i).startQuery >= sw . l || mims->at(i).endRef - mims->at(i).startRef >= sw . l )
 		{
-			double score = scoring( mims->at(i), ref, query );
 
 			unsigned int minLen = min( mims->at(i).endQuery - mims->at(i).startQuery, mims->at(i).endRef - mims->at(i).startRef);
 
 			double threshold = (1.0 - (mims->at(i).error*1.0/minLen*1.0))*100.0;
 
-			fprintf( out_fd, "%s%s%i%s%i%s%s%s%i%s%i%s%i%s%i%s%.2f%s%.2f\n", chromosome_g1.c_str(), "\t", mims->at(i).startRef+start_genome_1, "\t", mims->at(i).endRef + start_genome_1, "\t" , chromosome_g2.c_str() , "\t", mims->at(i).startQuery+start_genome_2, "\t", mims->at(i).endQuery+start_genome_2, "\t", mims->at(i).endRef - mims->at(i).startRef, "\t", mims->at(i).endQuery - mims->at(i).startQuery  ,"\t", threshold, "\t", score );
+			fprintf( out_fd, "%s%s%i%s%i%s%s%s%i%s%i%s%i%s%i%s%.2f\n", chromosome_g1.c_str(), "\t", mims->at(i).startRef+start_genome_1, "\t", mims->at(i).endRef + start_genome_1, "\t" , chromosome_g2.c_str() , "\t", mims->at(i).startQuery+start_genome_2, "\t", mims->at(i).endQuery+start_genome_2, "\t", mims->at(i).endRef - mims->at(i).startRef, "\t", mims->at(i).endQuery - mims->at(i).startQuery  ,"\t", threshold );
 		}		
 	}
 

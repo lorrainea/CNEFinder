@@ -8,7 +8,7 @@ LFLAGS= -std=c++11 -I ./
  
 EXE=    cnef
  
-SRC=    cnef.cc extend.cc utils.cc qgrams.cc overlaps.cc edlib.cc score.cc
+SRC=    cnef.cc extend.cc utils.cc qgrams.cc overlaps.cc edlib.cc
  
 HD=     cnef.h qgrams.h file.h qlist.h Makefile
  
