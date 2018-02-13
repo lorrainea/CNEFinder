@@ -737,8 +737,8 @@ int main(int argc, char **argv)
 	unsigned int q_gram_size =  sw . l /  ( ( sw . l - floor( sw . t * sw . l ) ) + 1 ) ;
 	sw . t = 1 - sw . t;
 
-	if( q_gram_size > 20 )
-		q_gram_size = 20;
+	if( q_gram_size > 16 )
+		q_gram_size = 16;
 
 	int start_genome_1 = 0;
 	int end_genome_1 = 0;
@@ -1244,7 +1244,7 @@ int main(int argc, char **argv)
 			fprintf( stderr, " Error: No Matches found, try using a smaller value for minimum length.\n" );
 			return ( 1 );
 		}
-		find_maximal_inexact_matches( sw , ref, rc_seq, q_grams, mims );
+		find_maximal_inexact_matches( sw , ref, rc_seq, q_grams, mims, q_gram_size );
 
 		free( rc_seq );
 
@@ -1265,7 +1265,7 @@ int main(int argc, char **argv)
 			return ( 1 );
 		}
 
-		find_maximal_inexact_matches( sw , ref, query, q_grams, mims );
+		find_maximal_inexact_matches( sw , ref, query, q_grams, mims, q_gram_size );
 	}
 
 	if( sw . x == 1 )

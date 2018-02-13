@@ -33,6 +33,17 @@
 
 using namespace std;
 
+bool order_qgram(QGramOcc a, QGramOcc b) 
+{ 
+	
+	if( a.occRef == b.occRef )
+	{
+		return( a.occQuery < b.occQuery );
+	}
+	else  return ( a.occRef < b.occRef ); 
+
+}
+
 bool order(MimOcc a, MimOcc b) 
 { 
 	
@@ -53,39 +64,53 @@ bool uniqueEnt(MimOcc a, MimOcc b)
 	else return false;
 }
 
-int find_maximal_inexact_matches( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramOcc> * q_grams, vector<MimOcc> * mims )
+int find_maximal_inexact_matches( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramOcc> * q_grams, vector<MimOcc> * mims, unsigned int qgram_size )
 {
+
+
+	sort( q_grams->begin(), q_grams->end(), order_qgram );
+
+	//for(int i=0; i<q_grams->size(); i++)
+		//if( q_grams->at(i).occRef +sw.a> 143917000  && q_grams->at(i).occRef +sw.a<143917500 )
+		//	cout<<q_grams->at(i).occRef+sw.a<<" "<<q_grams->at(i).occQuery+sw.a<<" "<<q_grams->at(i).length<<endl;
 
 	fprintf ( stderr, " -Merging exact matches\n" );
 	merge( sw, ref, query, q_grams, mims );
-	
+
+
+	if( mims->size() == 0 )
+	{
+		fprintf( stderr, "No CNEs identified!\n");
+		exit(1);
+	}
+
+	q_grams->clear();
+
 	fprintf ( stderr, " -Extending merged matches\n" );
 	for( int i=0; i<mims->size(); i++ )
-	{
+	{ 	
 		double minLen = min(mims->at(i).endRef-mims->at(i).startRef,mims->at(i).endQuery-mims->at(i).startQuery);
 		double maxLen = max(mims->at(i).endRef-mims->at(i).startRef,mims->at(i).endQuery-mims->at(i).startQuery);
 
 		if( mims->at(i). error / minLen < sw . t && maxLen <= sw . u )
-		{
-			extend( &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw );
+		{	
+				extend( &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw );
 		
-			adjust(  &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw );
+				adjust(  &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw );
 		}
 			
 	}
 
-	q_grams->clear();
 	sort( mims->begin(), mims->end(), order );
 
 
-	/* Remove overlapping MIMS */
+	/* Remove overlapping CNEs */
 	vector<MimOcc> * temp = new vector<MimOcc>;
 
 	temp->push_back(mims->at(0));
 	int i = 1;
 	while( i < mims->size()  )
 	{
-
 		if(  mims->at(i).endQuery - mims->at(i).startQuery < sw . l && mims->at(i).endRef - mims->at(i).startRef < sw . l )
 		{
 			i++;
@@ -138,6 +163,7 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 		double minLen = min(r_end - r_start, q_end - q_start );
 		double maxLen = max(r_end - r_start, q_end - q_start );
 
+
 		for( int j = i + 1; j<q_grams->size(); j++ )
 		{
 		
@@ -179,8 +205,17 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 				}
 			}
 
-			minLen = min(q_grams->at(j).occRef + q_grams->at(j).length - r_start, q_grams->at(j).occQuery+ q_grams->at(j).length - q_start );
-			maxLen = max(q_grams->at(j).occRef + q_grams->at(j).length - r_start, q_grams->at(j).occQuery+ q_grams->at(j).length - q_start );
+
+			if(  q_grams->at(j).occRef + q_grams->at(j).length > r_end &&  q_grams->at(j).occQuery + q_grams->at(j).length > q_end )
+			{
+				minLen = min(q_grams->at(j).occRef + q_grams->at(j).length - r_start, q_grams->at(j).occQuery+ q_grams->at(j).length - q_start );
+				maxLen = max(q_grams->at(j).occRef + q_grams->at(j).length - r_start, q_grams->at(j).occQuery+ q_grams->at(j).length - q_start );
+			}
+			else 
+			{	
+				maxLen = maxLen;
+				minLen = minLen;
+			}
 
 			if( query$ == false && ref$ == false )
 			{
@@ -210,7 +245,7 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 						maxLen = max(r_end - r_start, q_end - q_start );
 					}
 				}
-				else if( gap_size_query == 0 && gap_size_ref == 0 )
+				else if( gap_size_query == 0 && gap_size_ref == 0  )
 				{	
 					r_end = q_grams->at(j).occRef + q_grams->at(j).length;
 					q_end = q_grams->at(j).occQuery + q_grams->at(j).length;
@@ -233,15 +268,6 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 					m_query[ gap_size_query ] = '\0';
 					m_ref[ gap_size_ref ] = '\0';
 						
-					//int matching_qgrams = compute_qgrams( m_ref, m_query );
-
-					/*if( ( ( strlen( ( char * ) ref ) + 1 - matching_qgrams) / 3 ) - 1 + edit_distance > sw . k )
-					{	
-						free( m_query );
-						free( m_ref );
-						continue;
-					}*/
-				
 					int edit_distance_temp = edit_distance + editDistanceMyers( m_query, m_ref );
 
 					free( m_query );
@@ -263,7 +289,22 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 		}
 
 
-		if( max( r_end - r_start, q_end - q_start ) <= sw . u)
+
+		bool longer = false;
+
+		if( r_end-r_start > sw . l && r_end - r_start <= sw . u && q_end-q_start > sw . l && q_end - q_start <= sw . u )	
+			longer = true;
+
+		if( r_end - r_start > q_grams->at(i).length && q_end - q_start > q_grams->at(i).length )
+			longer = true;
+		
+		if ( r_end-r_start > sw . u && q_end - q_start > sw . u )
+		{
+			r_end = r_start + sw . l;
+			q_end = q_start + sw . l;
+		}
+		
+		if( max( r_end - r_start, q_end - q_start ) <= sw . u && longer == true )
 		{
 			MimOcc occ;
 			occ.startRef = r_start;
