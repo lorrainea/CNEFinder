@@ -318,7 +318,7 @@ void usage ( void )
    fprintf ( stdout, "    -j, --query-gene-file	<str>		GTF/GFF filename containing gene data for query genome.\n" );
    fprintf ( stdout, "    -m, --query-gene-name	<str>		Name of gene in query genome in which CNEs will be identified.\n\n" );
  
-   fprintf ( stdout, "    2.Search using coordinates:\n" );
+   fprintf ( stdout, "    2.Search using index position:\n" );
    fprintf ( stdout, "    -y, --ref-chrom		<str>		Chromosome of reference genome.\n" );
    fprintf ( stdout, "    -z, --query-chrom		<str>		Chromosome of query genome.\n" );
    fprintf ( stdout, "    -a, --ref-start		<int>		Start CNE search from this position of reference sequence.\n" );

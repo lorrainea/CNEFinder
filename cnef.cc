@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			fprintf ( stderr, " Error: Choose gene name or coordinates for reference sequence to search for CNEs!\n" );
+			fprintf ( stderr, " Error: Choose gene name or index position for reference sequence to search for CNEs!\n" );
 			return ( 1 );
 		}
 
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			fprintf ( stderr, " Error: Choose gene name or coordinates for query sequence to search for CNEs!\n" );
+			fprintf ( stderr, " Error: Choose gene name or index position for query sequence to search for CNEs!\n" );
 			return ( 1 );
 		}
 
@@ -176,6 +176,12 @@ int main(int argc, char **argv)
 		return ( 1 );
 	}
 	
+	if( sw . a < 0 || sw . b < 0 || sw . c < 0 || sw . d < 0 )
+	{
+		fprintf ( stderr, "Error: Reference and Query positions cannot be less than 0" );
+		return ( 1 );
+	}
+
 	/* Read the FASTA file for genome one in memory */
 	fprintf ( stderr, " Reading the file: %s\n", genome_one_filename );
 	if ( ! ( gen1_fd = fopen (  genome_one_filename, "r") ) )
@@ -918,39 +924,39 @@ int main(int argc, char **argv)
 
 	if( sw . a !=0 && start_genome_1 != sw . a )
 	{
-		fprintf( stderr, " Error: Start coordinate for reference is different to that of gene\n. Search by either gene name or coordinate.\n  ");
+		fprintf( stderr, " Error: Start position for reference is different to that of gene\n. Search by either gene name or index position.\n  ");
 		return ( 1 );
 	}
 
 	if( sw . b !=0 && end_genome_1 != sw . b )
 	{
-		fprintf( stderr, " Error: End coordinate for reference is different to that of gene\n. Search by either gene name or coordinate.\n  ");
+		fprintf( stderr, " Error: End position for reference is different to that of gene\n. Search by either gene name or index position.\n  ");
 		return ( 1 );
 	}
 
 	
 	if( sw . c !=0 && start_genome_2 != sw . c )
 	{
-		fprintf( stderr, " Error: Start coordinate for query is different to that of gene\n. Search by either gene name or coordinate.\n"  );
+		fprintf( stderr, " Error: Start position for query is different to that of gene\n. Search by either gene name or index position.\n"  );
 		return ( 1 );
 	}
 
 	
 	if( sw . d !=0 && end_genome_2 != sw . d )
 	{
-		fprintf( stderr, " Error: End coordinate for query is different to that of gene\n. Search by either gene name or coordinate.\n " );
+		fprintf( stderr, " Error: End position for query is different to that of gene\n. Search by either gene name or index position.\n " );
 		return ( 1 );
 	}
 
 
 	if( sw . a >= sw . b && sw . a != 0 && sw . b !=0 )
 	{
-		fprintf( stderr, " Error: Start coordinate of reference must be smaller than end coordinate.\n " );
+		fprintf( stderr, " Error: Start position of reference must be smaller than end position.\n " );
 		return ( 1 );
 	}
 	if( sw . c >= sw . d && sw . c != 0 && sw . d !=0 )
 	{
-		fprintf( stderr, " Error: Start coordinate of query must be smaller than end coordinate.\n"  );
+		fprintf( stderr, " Error: Start position of query must be smaller than end position.\n"  );
 		return ( 1 );
 	}
 	
@@ -1086,6 +1092,13 @@ int main(int argc, char **argv)
 			if( end_genome_1 > strlen( (char *) genome1[i] ) )
 				end_genome_1 = strlen( (char *) genome1[i] ) - 1;
 
+			if( start_genome_1 > strlen( (char*) genome1[i] ) || end_genome_1 > strlen( (char*) genome1[i] )  )
+			{
+			
+				fprintf( stderr, " Error: Reference index position is larger than size of chromosome.\n" );
+				return ( 1 );
+			}
+
 			memcpy( &ref[0], &genome1[i][start_genome_1], end_genome_1 - start_genome_1 );
 			memcpy( &ref_id[0], &seq_id_genome1[i][0], strlen( ( char* ) seq_id_genome1[i] ));
 
@@ -1147,6 +1160,14 @@ int main(int argc, char **argv)
 			if( end_genome_2 > strlen( (char *) genome2[i] ) )
 				end_genome_2 = strlen( (char *) genome2[i] ) - 1;
 	
+
+			if( start_genome_2 > strlen( (char*) genome2[i] ) || end_genome_2 > strlen( (char*) genome1[i] )  )
+			{
+			
+				fprintf( stderr, " Error: Query index position is larger than size of chromosome.\n" );
+				return ( 1 );
+			}
+
 			memcpy( &query[0], &genome2[i][start_genome_2], end_genome_2 - start_genome_2);
 			memcpy( &query_id[0], &seq_id_genome2[i][0], strlen( ( char* ) seq_id_genome2[i] ));
 
