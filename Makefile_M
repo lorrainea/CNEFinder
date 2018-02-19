@@ -1,6 +1,6 @@
 MF=     Makefile_M
  
-CC=     g++
+CC=     g++-7
  
 CFLAGS= -g -fopenmp -D_USE_OMP -msse4.2 -O3 -fomit-frame-pointer -funroll-loops  
  
