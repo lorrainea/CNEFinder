@@ -761,6 +761,7 @@ int main(int argc, char **argv)
 
 	int countTabs = 0;
 	string chromosome_g1;
+	string chromosome_g1_nochr;
 	string refGeneName = to_string( sw . a );
 	refGeneName.append( " - ");
 	refGeneName.append( to_string( sw . b ) );
@@ -831,12 +832,17 @@ int main(int argc, char **argv)
 		start_genome_1 = sw . a;
 		end_genome_1 = sw . b;
 		if( prefix( chromosome_g1 , "CHR" ) == false )
+		{
+			chromosome_g1_nochr.append( reinterpret_cast<char*>( sw . ref_chrom ) );
 			chromosome_g1.insert( 0, "CHR" );
+		}
 		chromosome_g1.append( reinterpret_cast<char*>( sw . ref_chrom ) );
 	}
+	chromosome_g1_nochr.append( "\t" );
 	chromosome_g1.append( "\t" );
 
 	string chromosome_g2;
+	string chromosome_g2_nochr;
 	string queryGeneName = to_string( sw . c );
 	queryGeneName.append( " - ");
 	queryGeneName.append( to_string( sw . d ) );
@@ -906,9 +912,13 @@ int main(int argc, char **argv)
 		start_genome_2 = sw . c;
 		end_genome_2 = sw . d;
 		if( prefix( chromosome_g2, "CHR" ) == false )
+		{ 	chromosome_g2_nochr.append( reinterpret_cast<char*>( sw . query_chrom ) );
 			chromosome_g2.insert( 0, "CHR" );
+
+		}
 		chromosome_g2.append( reinterpret_cast<char*>( sw . query_chrom ) );
 	}
+	chromosome_g2_nochr.append( "\t" );
 	chromosome_g2.append( "\t" );
 
 	for ( i = 0; i < num_seqs_g; i ++ )
@@ -961,10 +971,10 @@ int main(int argc, char **argv)
 	}
 	
 	//Obtaining exon coordinates
-
+	
 	for(int i=0; i<num_seqs_e; i++)
 	{
-		if( prefix( reinterpret_cast<char*>( ref_exons[i] ), chromosome_g1 ) == true )
+		if( prefix( reinterpret_cast<char*>( ref_exons[i] ), chromosome_g1 ) == true ||  prefix( reinterpret_cast<char*>( ref_exons[i] ), chromosome_g1_nochr ) == true  )
 		{
 			countTabs = 0;
 			string c1 = "";
@@ -1013,7 +1023,7 @@ int main(int argc, char **argv)
 
 	for(int i=0; i<num_seqs_f; i++)
 	{
-		if( prefix( reinterpret_cast<char*>(query_exons[i]), chromosome_g2 ) == true )
+		if( prefix( reinterpret_cast<char*>(query_exons[i]), chromosome_g2 ) == true || prefix( reinterpret_cast<char*>( query_exons[i] ), chromosome_g2_nochr ) == true )
 		{
 			countTabs = 0;
 			string c1;
