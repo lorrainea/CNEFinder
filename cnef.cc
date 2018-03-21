@@ -1128,7 +1128,7 @@ int main(int argc, char **argv)
 
 
 	//remove all exons from reference 
-
+	#pragma omp parallel for
 	for(int i=0; i<exons_g1_start->size(); i++)
 	{
 		for( int j= exons_g1_start->at(i) - start_genome_1; j<exons_g1_end->at(i) - start_genome_1; j++ )
@@ -1196,7 +1196,7 @@ int main(int argc, char **argv)
 	}
 
 	//removing exons from query
-
+	#pragma omp parallel for
 	for(int i=0; i<exons_g2_start->size(); i++)
 	{
 		for( int j= exons_g2_start->at(i) - start_genome_2; j<exons_g2_end->at(i) - start_genome_2; j++ )
