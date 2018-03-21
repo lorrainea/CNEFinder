@@ -83,12 +83,12 @@ int find_maximal_inexact_matches( TSwitch sw, unsigned char * ref, unsigned char
 	q_grams->clear();
 
 	fprintf ( stderr, " -Extending merged matches\n" );
+	#pragma omp parallel for
 	for( int i=0; i<mims->size(); i++ )
 	{ 	
 		double minLen = min(mims->at(i).endRef-mims->at(i).startRef,mims->at(i).endQuery-mims->at(i).startQuery);
 		double maxLen = max(mims->at(i).endRef-mims->at(i).startRef,mims->at(i).endQuery-mims->at(i).startQuery);
 
-		#pragma omp parallel for
 		if( mims->at(i). error / minLen < sw . t && maxLen <= sw . u )
 		{	
 			extend( &mims->at(i).error, (int*) &mims->at(i).startQuery, (int*) &mims->at(i).endQuery, (int*) &mims->at(i).startRef, (int*) &mims->at(i).endRef, ref, query, sw );
