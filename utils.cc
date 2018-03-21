@@ -307,7 +307,7 @@ void usage ( void )
    fprintf ( stdout, "  -e, --exons-ref-file		<str>		GTF/GFF exon coordinates for reference genome filename.\n" );
    fprintf ( stdout, "  -f, --exons-query-file	<str>		GTF/GFF exon coordinates for query genome filename.\n" );
    fprintf ( stdout, "  -l, --min-seq-length		<int>		Minimum length of CNE.\n" );   
-   fprintf ( stdout, "  -t, --sim-threshold		<dbl>		Threshold of similarity between sequences.\n" );
+   fprintf ( stdout, "  -t, --sim-threshold		<dbl>		Threshold of similarity between sequences (0-1].\n" );
    fprintf ( stdout, "  -o, --output-file		<str>		Output filename with CNEs identified.\n\n" ); 
 
    fprintf ( stdout, "  Either 1. or 2.\n" );
