@@ -96,7 +96,7 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
    sw -> d				= 0;
    sw -> p				= 1;
    sw -> T                              = 1;
-   sw -> M				= 0;
+   sw -> M				= 0.5;
    sw -> Q				= 18;
    args = 0;
 
@@ -350,7 +350,7 @@ void usage ( void )
 
    fprintf ( stdout, " Optional:\n" );
    fprintf ( stdout, "  -Q, --mem-length		<int>		Minimum length of maximal exact matches. Default:18.\n" );
-   fprintf ( stdout, "  -M, --merged-length		<int>		Minimum length of merged matches to be extended. Default:l.\n" );
+   fprintf ( stdout, "  -M, --merged-length		<dbl>		Minimum length (in terms of CNE length) of merged matches to be extended. Default:0.5.\n" );
    fprintf ( stdout, "  -s, --ext-threshold		<dbl>		Threshold to further extend similarity threshold by. Default:0.05.\n" );
    fprintf ( stdout, "  -u, --max-seq-length		<int>		Set a maximum length for the CNE. Default:2000.\n" ); 
    fprintf ( stdout, "  -p, --repeat-regions		<int>		Choose 1 to filter repetitive regions of genomes or 0 otherwise. Default:1.\n");	

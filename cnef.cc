@@ -742,8 +742,11 @@ int main(int argc, char **argv)
 	unsigned int q_gram_size =  max( sw . Q/1.0, sw . l /  ( ( sw . l - floor( sw . t * sw . l ) ) + 1 ) ) ;
 	sw . t = 1 - sw . t;
 
-	if( sw . M == 0 )
-		sw . M = sw . l;
+	if( sw . M <= 0 || sw . M > 1 )
+	{
+		fprintf( stderr, " Error: Minimum length of merged matches must be larger than 0 and smaller or equal to 1!\n");
+		return ( 1 );
+	}
 	
 	int start_genome_1 = 0;
 	int end_genome_1 = 0;

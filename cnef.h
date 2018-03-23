@@ -47,9 +47,9 @@ struct TSwitch
    char               * query_gene_name;
    char               * ref_chrom;
    char               * query_chrom;
-   double 		t, s;
+   double 		t, s, M;
    int 			T, x, a, b, c, d, p, u;
-   unsigned int         l, v, M, Q;
+   unsigned int         l, v, Q;
    
  };
 

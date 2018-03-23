@@ -66,26 +66,11 @@ bool uniqueEnt(MimOcc a, MimOcc b)
 
 int find_maximal_inexact_matches( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramOcc> * q_grams, vector<MimOcc> * mims, unsigned int qgram_size )
 {
-	//cout<<144041329 - sw . a<<" "<<144046329 + 1000 - sw . a<<" "<<144041557 - sw . c<<" "<<144046557 +1000 - sw . c<<endl;
-
-	/*for(int i=0; i<q_grams->size(); i++)
-	{
-		//cout<<q_grams->at(i).occRef<<" "<<q_grams->at(i).occQuery<<endl;
-		if( q_grams->at(i).occRef > 145976167 - sw . a &&  q_grams->at(i).occRef < 145978167 + 1000 - sw . a && q_grams->at(i).occQuery > 35358849 - sw . c && q_grams->at(i).occQuery < 35360849 +1000 - sw . c )
-		{
-			//cout<<q_grams->at(i).occRef+sw.a <<" "<<q_grams->at(i).occQuery+sw.c<<" "<<q_grams->at(i).length <<endl;
-		}
-	}*/
-
 	sort( q_grams->begin(), q_grams->end(), order_qgram );
 
 	fprintf ( stderr, " -Merging exact matches\n" );
 	merge( sw, ref, query, q_grams, mims );
 
-
-
-	//for(int i=0; i<mims->size(); i++ )
-	//	cout<<mims->at(i).startRef+sw.a<<" "<<mims->at(i).endRef+sw.a<<" "<<mims->at(i).startQuery+sw.b<<" "<<mims->at(i).endQuery+sw.b<<endl;
 	if( mims->size() == 0 )
 	{
 		fprintf( stderr, "No CNEs identified!\n");
@@ -300,11 +285,11 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 
 		bool longer = false;
 
-		if( r_end-r_start >= sw . M && r_end - r_start <= sw . u && q_end-q_start >= sw . M && q_end - q_start <= sw . u )	
+		if( r_end-r_start >= sw . M * sw . l && r_end - r_start <= sw . u && q_end-q_start >= sw . M * sw . l && q_end - q_start <= sw . u )	
 			longer = true;
 
-		if( r_end - r_start > q_grams->at(i).length && q_end - q_start > q_grams->at(i).length )
-			longer = true;
+		//if( r_end - r_start > q_grams->at(i).length && q_end - q_start > q_grams->at(i).length )
+		//	longer = true;
 		
 		if ( r_end-r_start > sw . u && q_end - q_start > sw . u )
 		{

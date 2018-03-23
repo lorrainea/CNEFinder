@@ -31,7 +31,7 @@ CNEFinder: Finding Conserved Non-coding Elements in Genomes
     -d, --query-end		<int>		End CNE search at this position of query sequence.
 
   Optional:
-  -Q, --mem-length		<int>		Minimum length of maximal exact matches. Default:18.
+  -Q, --mem-length		<int>		Minimum length (in terms of CNE length) of merged matches to be extended. Default:0.5.
   -M, --merged-length		<int>		Minimum length of merged matches to be extended. Default:l.
   -s, --ext-threshold		<dbl>		Threshold to further extend similarity threshold by. Default:0.05.
   -u, --max-seq-length		<int>		Set a maximum length for the CNE. Default:2000.
