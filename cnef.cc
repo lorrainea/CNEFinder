@@ -739,13 +739,12 @@ int main(int argc, char **argv)
 	int geneOnePos = 0;
 	int geneTwoPos = 0;
 
-	
-	unsigned int q_gram_size =  sw . l /  ( ( sw . l - floor( sw . t * sw . l ) ) + 1 ) ;
+	unsigned int q_gram_size =  max( sw . Q/1.0, sw . l /  ( ( sw . l - floor( sw . t * sw . l ) ) + 1 ) ) ;
 	sw . t = 1 - sw . t;
 
-	if( q_gram_size > 16 )
-		q_gram_size = 16;
-
+	if( sw . M == 0 )
+		sw . M = sw . l;
+	
 	int start_genome_1 = 0;
 	int end_genome_1 = 0;
 	int start_genome_2 = 0;

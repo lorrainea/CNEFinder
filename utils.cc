@@ -54,6 +54,8 @@ static struct option long_options[] =
    { "ref-chrom",                       optional_argument, NULL, 'y' },
    { "query-chrom",			optional_argument, NULL, 'z' },
    { "repeat-regions",			optional_argument, NULL, 'p' },
+   { "merged-length",			optional_argument, NULL, 'M' },
+   { "mem-length",			optional_argument, NULL, 'Q' },
    { "help",                    	no_argument,       NULL, 'h' },
    { NULL,                      	0,                 NULL,  0  }
  };
@@ -94,9 +96,11 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
    sw -> d				= 0;
    sw -> p				= 1;
    sw -> T                              = 1;
+   sw -> M				= 0;
+   sw -> Q				= 18;
    args = 0;
 
-   while ( ( opt = getopt_long ( argc, argv, "q:r:o:e:f:g:j:x:n:m:l:u:t:s:v:a:b:c:d:y:z:p:T:h", long_options, &oi ) ) != -1 ) 
+   while ( ( opt = getopt_long ( argc, argv, "q:r:o:e:f:g:j:x:n:m:l:u:t:s:v:a:b:c:d:y:z:p:T:M:Q:h", long_options, &oi ) ) != -1 ) 
     {
 
       switch ( opt )
@@ -281,6 +285,24 @@ int decode_switches ( int argc, char * argv [], struct TSwitch * sw )
            sw -> T = val;
            break;
 
+	 case 'M':
+           val = strtod ( optarg, &ep );
+           if ( optarg == ep )
+            {
+              return ( 0 );
+            }
+           sw -> M = val;
+           break;
+
+	 case 'Q':
+           val = strtod ( optarg, &ep );
+           if ( optarg == ep )
+            {
+              return ( 0 );
+            }
+           sw -> Q = val;
+           break;
+
          case 'h':
            return ( 0 );
        }
@@ -327,6 +349,8 @@ void usage ( void )
    fprintf ( stdout, "    -d, --query-end		<int>		End CNE search at this position of query sequence.\n\n" );
 
    fprintf ( stdout, " Optional:\n" );
+   fprintf ( stdout, "  -Q, --mem-length		<int>		Minimum length of maximal exact matches. Default:18.\n" );
+   fprintf ( stdout, "  -M, --merged-length		<int>		Minimum length of merged matches to be extended. Default:l.\n" );
    fprintf ( stdout, "  -s, --ext-threshold		<dbl>		Threshold to further extend similarity threshold by. Default:0.05.\n" );
    fprintf ( stdout, "  -u, --max-seq-length		<int>		Set a maximum length for the CNE. Default:2000.\n" ); 
    fprintf ( stdout, "  -p, --repeat-regions		<int>		Choose 1 to filter repetitive regions of genomes or 0 otherwise. Default:1.\n");	
