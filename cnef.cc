@@ -1241,7 +1241,8 @@ int main(int argc, char **argv)
 	free( ref_exons );
 	free( query_exons );
 	
-	fprintf ( stderr, " Computing CNEs \n" );
+	
+	fprintf ( stderr, " Computing CNEs with minimum length %i, maximum length %i and similarity threshold %.2f\% \n", sw . l, sw . u, 100.0-sw.t * 100.0 );
 
 	ofstream new_ref;
 	new_ref.open("new_ref.fa");

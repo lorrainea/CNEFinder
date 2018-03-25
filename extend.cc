@@ -68,7 +68,7 @@ int find_maximal_inexact_matches( TSwitch sw, unsigned char * ref, unsigned char
 {
 	sort( q_grams->begin(), q_grams->end(), order_qgram );
 
-	fprintf ( stderr, " -Merging exact matches\n" );
+	fprintf ( stderr, " -Merging maximal exact matches\n" );
 	merge( sw, ref, query, q_grams, mims );
 
 	if( mims->size() == 0 )
