@@ -421,7 +421,7 @@ bool is_numeric(const string &str)
 int find_maximal_exact_matches( unsigned int l, unsigned char * ref, unsigned char * query, vector<QGramOcc> * q_grams, TSwitch sw )
 {
 
-    fprintf ( stderr, " -Identifying exact matches \n" );
+    fprintf ( stderr, " -Identifying maximal exact matches of minimum length %i\n", l );
     
     int32_t i=0, n=1;
     uint32_t options, revComplement=0;
