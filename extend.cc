@@ -66,9 +66,10 @@ bool uniqueEnt(MimOcc a, MimOcc b)
 
 int find_maximal_inexact_matches( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramOcc> * q_grams, vector<MimOcc> * mims, unsigned int qgram_size )
 {
+
 	sort( q_grams->begin(), q_grams->end(), order_qgram );
 
-	fprintf ( stderr, " -Merging maximal exact matches\n" );
+	fprintf ( stderr, " -Merging %i maximal exact matches\n", q_grams->size() );
 	merge( sw, ref, query, q_grams, mims );
 
 	if( mims->size() == 0 )
@@ -79,7 +80,9 @@ int find_maximal_inexact_matches( TSwitch sw, unsigned char * ref, unsigned char
 
 	q_grams->clear();
 
-	fprintf ( stderr, " -Extending merged matches\n" );
+	int merged_size = sw . M * sw . l;
+	fprintf ( stderr, " -Extending %i merged matches of minimum length %i, with an additional extension threshold of %.2f\n", mims->size(), merged_size, sw . s );
+
 	#pragma omp parallel for
 	for( int i=0; i<mims->size(); i++ )
 	{ 	
