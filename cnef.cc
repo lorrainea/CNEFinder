@@ -819,7 +819,7 @@ int main(int argc, char **argv)
 		trim( endCoord_g1 );
 		trim(  chromosome_g1 );
 		start_genome_1 = atoi( startCoord_g1.c_str() );
-		int diff = 0.005 * start_genome_1;
+		int diff = 0.05 * start_genome_1;
 		start_genome_1 = start_genome_1 - diff;
 
 		end_genome_1 = atoi( endCoord_g1.c_str() );
@@ -902,7 +902,7 @@ int main(int argc, char **argv)
 	
 
 		start_genome_2 = atoi( startCoord_g2.c_str() );
-		int diff = 0.005 * start_genome_2;
+		int diff = 0.05 * start_genome_2;
 		start_genome_2 = start_genome_2 - diff;
 
 		end_genome_2 = atoi( endCoord_g2.c_str() );
