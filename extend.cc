@@ -529,7 +529,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 				edit_distance_R =  editDistanceMyers( m_ref_R, m_query_R );
 				operationEnd = 'I';
 
-				rec = m_ref_R[ strlen( ( char* ) xInput )  - 1];
+				rec = m_ref_R[ strlen( ( char* ) m_ref_R )  - 1];
 				qec = m_query_R[ toAddEndQuery - 1];
 
 				free( m_ref_R );
@@ -554,7 +554,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 				operationEnd = 'D';
 
 				rec = m_ref_R[ toAddEndRef - 1 ];
-				qec = m_query_R[  strlen( ( char* ) yInput )  - 1];
+				qec = m_query_R[  strlen( ( char* ) m_query_R )  - 1];
 
 				free( m_ref_R );
 				free( m_query_R );
