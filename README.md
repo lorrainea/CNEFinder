@@ -45,5 +45,12 @@ CNEFinder: Finding Conserved Non-coding Elements in Genomes
 
 <b>See https://github.com/lorrainea/CNEFinder/wiki for more help.</b>
 
+<b>Citation</b>:
+
+```
+L. A. K. Ayad, S. P. Pissis, D. Polychronopoulos: 
+CNEFinder: finding conserved non-coding elements in genomes. 
+Bioinformatics: 34(17): i743-i747 (2018) 
+```
 <b>License</b>: GNU GPLv3 License; Copyright (C) 2017 Lorraine A. K. Ayad, Solon P. Pissis, Dimitris Polychronopoulos
 
