@@ -1018,19 +1018,29 @@ int main(int argc, char **argv)
 				}
 			}
 
-			if( ( !( atoi( c2.c_str() ) < start_genome_1 )  && !(atoi( c1.c_str() ) > end_genome_1) ) )
+			if( start_genome_1 > 0 && end_genome_1 > 0 )
+			{
+				if( ( !( atoi( c2.c_str() ) < start_genome_1 )  && !(atoi( c1.c_str() ) > end_genome_1) ) )
+				{
+					exons_g1_start->push_back( atoi( c1.c_str() ) );
+					exons_g1_end->push_back( atoi( c2.c_str() ) );
+				}
+			}
+			else
 			{
 				exons_g1_start->push_back( atoi( c1.c_str() ) );
 				exons_g1_end->push_back( atoi( c2.c_str() ) );
+
 			}
 		}
 
 	}
 
+
 	for(int i=0; i<num_seqs_f; i++)
 	{
 		if( prefix( reinterpret_cast<char*>(query_exons[i]), chromosome_g2 ) == true || prefix( reinterpret_cast<char*>( query_exons[i] ), chromosome_g2_nochr ) == true )
-		{
+		{	
 			countTabs = 0;
 			string c1;
 			string c2;
@@ -1067,7 +1077,15 @@ int main(int argc, char **argv)
 				}
 			}
 
-			if( ( !( atoi( c2.c_str() ) < start_genome_2 )  && !(atoi( c1.c_str() ) > end_genome_2) ) )
+			if( start_genome_2 > 0 && end_genome_2 > 0 )
+			{
+				if( ( !( atoi( c2.c_str() ) < start_genome_2 )  && !(atoi( c1.c_str() ) > end_genome_2) ) )
+				{	
+					exons_g2_start->push_back( atoi( c1.c_str() ) );
+					exons_g2_end->push_back( atoi( c2.c_str() ) );
+				}
+			}
+			else
 			{
 				exons_g2_start->push_back( atoi( c1.c_str() ) );
 				exons_g2_end->push_back( atoi( c2.c_str() ) );
@@ -1137,7 +1155,7 @@ int main(int argc, char **argv)
 
 	#pragma omp parallel for
 	for(int i=0; i<exons_g1_start->size(); i++)
-	{
+	{	
 		for( int j= exons_g1_start->at(i) - start_genome_1; j<exons_g1_end->at(i) - start_genome_1; j++ )
 		{	
 			if( j < strlen( ( char* ) ref ) )
@@ -1202,7 +1220,6 @@ int main(int argc, char **argv)
 	}
 
 	//removing exons from query
-
 	#pragma omp parallel for
 	for(int i=0; i<exons_g2_start->size(); i++)
 	{
