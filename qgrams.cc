@@ -44,7 +44,6 @@
 #include "file.h"
 #include "qlist.h"
 
-
 using namespace std;
 using namespace boost;
 
@@ -427,8 +426,9 @@ int find_maximal_exact_matches( unsigned int l, unsigned char * ref, unsigned ch
     uint32_t options, revComplement=0;
     seqFileReadInfo RefFile, QueryFile;
 
-    RefFile.openFile( "new_ref.fa" );
-    QueryFile.openFile( "new_query.fa" );
+    
+    RefFile.openFile( "new_ref_"+string(sw.output_filename)+".fa" );
+    QueryFile.openFile( "new_query_"+string(sw.output_filename)+".fa" );
 
     commonData::minMemLen = 2* l;
     if( l % 2 == 0 )

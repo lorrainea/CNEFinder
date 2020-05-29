@@ -1266,13 +1266,13 @@ int main(int argc, char **argv)
 	fprintf ( stderr, " Computing CNEs with minimum length %i, maximum length %i and similarity threshold %.2f\% \n", sw . l, sw . u, 100.0-sw.t * 100.0 );
 
 	ofstream new_ref;
-	new_ref.open("new_ref.fa");
+	new_ref.open("new_ref_"+string(sw.output_filename)+".fa");
   	new_ref <<">"<<"new_ref"<<"\n"<<ref<<"\n";
   	new_ref.close();  
 
 	ofstream new_query;
-	new_query.open("new_query.fa");
-  	new_query <<">"<<"new_query"<<"\n"<<query<<"\n";
+	new_query.open("new_query_"+string(sw.output_filename)+".fa");
+  	new_query <<">"<<"new_query_"+string(sw.output_filename)+".fa"<<"\n"<<query<<"\n";
   	new_query.close();  
 
 	vector<QGramOcc> * q_grams = new vector<QGramOcc>;
