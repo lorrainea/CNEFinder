@@ -22,3 +22,23 @@ After compilation the binary `cnef' will be created in the working
 directory, e.g. you may call it from this directory via
 
  S ./cnef
+
+
+Installation with CMake
+=======================
+
+CMake will automatically find the pre-installed softwares in your system:
+C++ compiler with C++11 support, OpenMP, and Boost.
+They can be installed easily with Homebrew:
+
+    brew install cmake libomp boost
+
+Then, you can install the latest version to an arbitrary `DESTINATION`:
+
+    git clone https://github.com/lorrainea/CNEFinder.git
+    cd CNEFinder/
+    mkdir build
+    cd build/
+    DESTINATION=${HOME}/local
+    cmake -DCMAKE_INSTALL_PREFIX=${DESTINATION} ..
+    make -j4 install
