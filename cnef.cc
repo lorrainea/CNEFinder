@@ -573,7 +573,7 @@ int main(int argc, char **argv)
 
 		if ( num_seqs_f >= max_alloc_seq_f )
 		{
-			query_exons = ( unsigned char ** ) realloc ( query_exons,   ( max_alloc_seq_e + ALLOC_SIZE ) * sizeof ( unsigned char * ) );
+			query_exons = ( unsigned char ** ) realloc ( query_exons,   ( max_alloc_seq_f + ALLOC_SIZE ) * sizeof ( unsigned char * ) );
 			max_alloc_seq_f += ALLOC_SIZE;
 		}
 
