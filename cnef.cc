@@ -748,10 +748,10 @@ int main(int argc, char **argv)
 		return ( 1 );
 	}
 
-	int start_genome_1 = 0;
-	int end_genome_1 = 0;
-	int start_genome_2 = 0;
-	int end_genome_2 = 0;
+	unsigned int start_genome_1 = 0;
+	unsigned int end_genome_1 = 0;
+	unsigned int start_genome_2 = 0;
+	unsigned int end_genome_2 = 0;
 	
 
 	vector<int> * exons_g1_start = new vector<int>;
@@ -1125,7 +1125,7 @@ int main(int argc, char **argv)
 		
 			if( end_genome_1 > strlen( (char *) genome1[i] ) )
 				end_genome_1 = strlen( (char *) genome1[i] ) - 1;
-
+			
 			if( start_genome_1 > strlen( (char*) genome1[i] ) || end_genome_1 > strlen( (char*) genome1[i] )  )
 			{
 			
@@ -1236,7 +1236,6 @@ int main(int argc, char **argv)
 	delete( exons_g1_end );
 	delete( exons_g2_start );
 	delete( exons_g2_end );
-
 
 	for ( i = 0; i < num_seqs; i ++ )
 	{
