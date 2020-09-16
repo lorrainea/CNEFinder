@@ -318,36 +318,36 @@ int merge( TSwitch sw, unsigned char * ref, unsigned char * query, vector<QGramO
 
 int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_start, int * r_end, unsigned char * xInput, unsigned char * yInput, TSwitch sw )
 {
-	int toAddStartQuery = 1;
-	int toAddEndQuery = 1;
-	int toAddStartRef = 1;
-	int toAddEndRef = 1;
+	unsigned int toAddStartQuery = 1;
+	unsigned int toAddEndQuery = 1;
+	unsigned int toAddStartRef = 1;
+	unsigned int toAddEndRef = 1;
 
-	int q_start_temp = *q_start;
-	int q_end_temp = *q_end;
-	int r_start_temp = *r_start;
-	int r_end_temp = *r_end;
+	unsigned int q_start_temp = *q_start;
+	unsigned int q_end_temp = *q_end;
+	unsigned int r_start_temp = *r_start;
+	unsigned int r_end_temp = *r_end;
 
-	int qS = *q_start;
-	int rS = *r_start;	
-	int qE = *q_end;
-	int rE = *r_end;
+	unsigned int qS = *q_start;
+	unsigned int rS = *r_start;	
+	unsigned int qE = *q_end;
+	unsigned int rE = *r_end;
 
 	char rsc;
 	char qsc;
 	char rec;
 	char qec;
 
-	int rs = *r_start;
-	int qs = *q_start;
-	int re = *r_end;
-	int qe = *q_end;
+	unsigned int rs = *r_start;
+	unsigned int qs = *q_start;
+	unsigned int re = *r_end;
+	unsigned int qe = *q_end;
 
-	int edit_distance_total_L = 0;
-	int edit_distance_total_R = 0;
+	unsigned int edit_distance_total_L = 0;
+	unsigned int edit_distance_total_R = 0;
 
-	int edit_distance_temp = *edit_distance;
-	int edit_distance_updated = *edit_distance;
+	unsigned int edit_distance_temp = *edit_distance;
+	unsigned int edit_distance_updated = *edit_distance;
 
 	char operationEnd;
 	char operationStart;
@@ -370,11 +370,11 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 		char dRref;
 		char dRquery;
 
-		int maxSeq = max(  strlen( ( char* ) yInput ),strlen( ( char* ) xInput ) );
+		unsigned int maxSeq = max(  strlen( ( char* ) yInput ),strlen( ( char* ) xInput ) );
 
 		if (  q_end_temp  < strlen( ( char* ) yInput )  &&  r_end_temp  < strlen( ( char* ) xInput ) ) 
 		{	
-			int editDist_S = 0;
+			unsigned int editDist_S = 0;
 			unsigned char * m_ref_R  = ( unsigned char * ) calloc (  toAddEndRef + 1, sizeof ( unsigned char ) );
 			unsigned char * m_query_R  = ( unsigned char * ) calloc ( toAddEndQuery + 1, sizeof ( unsigned char ) );
 
@@ -395,8 +395,8 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 				sRquery = m_query_R[toAddEndQuery -1];
 			}
 				
-			int editDist_I = 0;
-			int editDist_D = 0;
+			unsigned int editDist_I = 0;
+			unsigned int editDist_D = 0;
 			
 	
 			if( toAddEndRef > 1 )
@@ -570,7 +570,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 
 
 		/*********************************************** score for extending left *************************************************/
-		int edit_distance_L = 0;
+		unsigned int edit_distance_L = 0;
 
 		char sLref;
 		char sLquery;
@@ -581,7 +581,7 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 
 		if(  q_start_temp  > 0 &&  r_start_temp > 0   )  
 		{
-			int editDist_S;
+			unsigned int editDist_S;
 			unsigned char * m_ref_L = ( unsigned char * ) calloc ( toAddStartRef + 1, sizeof ( unsigned char ) );
 			unsigned char * m_query_L = ( unsigned char * ) calloc ( toAddStartQuery + 1, sizeof ( unsigned char ) );
 			
@@ -604,8 +604,8 @@ int extend( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 				sLquery = m_query_L[0];
 			}
 
-			int editDist_I = 0;
-			int editDist_D = 0;
+			unsigned int editDist_I = 0;
+			unsigned int editDist_D = 0;
 
 			if( toAddStartRef > 1 )
 			{
@@ -1032,15 +1032,15 @@ return 0;
 
 int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_start, int * r_end, unsigned char * xInput, unsigned char * yInput, TSwitch sw )
 {
-	int rS = *r_start;
-	int qS = *q_start;
-	int rE = *r_end;
-	int qE = *q_end;
+	unsigned int rS = *r_start;
+	unsigned int qS = *q_start;
+	unsigned int rE = *r_end;
+	unsigned int qE = *q_end;
 
-	int rSb = *r_start;
-	int rEb = *r_end;
-	int qSb = *q_start;
-	int qEb = *q_end;
+	unsigned int rSb = *r_start;
+	unsigned int rEb = *r_end;
+	unsigned int qSb = *q_start;
+	unsigned int qEb = *q_end;
 
 	unsigned char * A = ( unsigned char * ) calloc (  rE - rS + 1, sizeof ( unsigned char ) );
 	unsigned char * B = ( unsigned char * ) calloc ( qE - qS + 1, sizeof ( unsigned char ) );
@@ -1056,12 +1056,12 @@ int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 	free( B );
 
 	
-	int minLen = min( rE - rS, qE - qS );
-	int maxLen = max( rE - rS, qE - qS );
+	unsigned int minLen = min( rE - rS, qE - qS );
+	unsigned int maxLen = max( rE - rS, qE - qS );
 	
 	if(  *edit_distance / minLen < sw.t && maxLen <= sw . u  ) 
 	{
-		int eD = *edit_distance;
+		unsigned int eD = *edit_distance;
 
 		extend( ( unsigned int*) &eD, (int*) &qS, (int*) &qE, (int*) &rS, (int*) &rE,  xInput, yInput, sw );
 
@@ -1087,7 +1087,7 @@ int adjust( unsigned int * edit_distance, int * q_start,  int * q_end, int * r_s
 
 	while( rSb != *r_start || rEb != *r_end || qSb != *q_start || qEb != *q_end )
 	{
-		int eD = *edit_distance;
+		unsigned int eD = *edit_distance;
 		
 		rSb = *r_start;
 		rEb = *r_end;
@@ -1123,7 +1123,7 @@ Myers Bit-Vector algorithm implemented using edlib Library
 */
 int editDistanceMyers( unsigned char * xInput, unsigned char * yInput )
 {
-	int score = edlibAlign( (const char*) xInput, strlen( (char*) xInput ), (const char*) yInput, strlen( (char*) yInput ), edlibDefaultAlignConfig()).editDistance;
+	unsigned int score = edlibAlign( (const char*) xInput, strlen( (char*) xInput ), (const char*) yInput, strlen( (char*) yInput ), edlibDefaultAlignConfig()).editDistance;
 
 	return score;
 }
