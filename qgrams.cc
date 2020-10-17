@@ -427,8 +427,8 @@ int find_maximal_exact_matches( unsigned int l, unsigned char * ref, unsigned ch
     seqFileReadInfo RefFile, QueryFile;
 
     
-    RefFile.openFile( "new_ref_"+string(sw.output_filename)+".fa" );
-    QueryFile.openFile( "new_query_"+string(sw.output_filename)+".fa" );
+    RefFile.openFile( string(sw.output_filename)+"_new_ref.fa" );
+    QueryFile.openFile( string(sw.output_filename)+"_new_query.fa" );
 
     commonData::minMemLen = 2* l;
     if( l % 2 == 0 )
