@@ -1266,12 +1266,12 @@ int main(int argc, char **argv)
 
 	ofstream new_ref;
 	new_ref.open(string(sw.output_filename)+"_new_ref.fa");
-  	new_ref <<">"<<"new_ref"<<"\n"<<ref<<"\n";
+  	new_ref <<">"<<"new_ref_"+string(sw.output_filename)<<"\n"<<ref<<"\n";
   	new_ref.close();  
 
 	ofstream new_query;
 	new_query.open(string(sw.output_filename)+"_new_query.fa");
-  	new_query <<">"<<"new_query_"+string(sw.output_filename)+".fa"<<"\n"<<query<<"\n";
+  	new_query <<">"<<"new_query_"+string(sw.output_filename)<<"\n"<<query<<"\n";
   	new_query.close();  
 
 	vector<QGramOcc> * q_grams = new vector<QGramOcc>;
