@@ -17,9 +17,9 @@ CNEFinder: Finding Conserved Non-coding Elements in Genomes
 
   Either 1. or 2.
     1.Search using gene name:
-    -g, --ref-gene-file		<str>		GTF/GFF filename containing gene data for reference genome.
+    -g, --ref-gene-file		<str>		TSV filename containing gene data for reference genome.
     -n, --ref-gene-name		<str>		Name of gene in reference genome in which CNEs will be identified.
-    -j, --query-gene-file	<str>		GTF/GFF filename containing gene data for query genome.
+    -j, --query-gene-file	<str>		TSV filename containing gene data for query genome.
     -m, --query-gene-name	<str>		Name of gene in query genome in which CNEs will be identified.
 
     2.Search using index position:
