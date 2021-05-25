@@ -9,8 +9,8 @@ CNEFinder: Finding Conserved Non-coding Elements in Genomes
  Standard (Mandatory):
   -r, --ref-genome-file		<str>		FASTA reference genome filename.
   -q, --query-genome-file	<str>		FASTA query genome filename.
-  -e, --exons-ref-file		<str>		GTF/GFF exon coordinates for reference genome filename.
-  -f, --exons-query-file	<str>		GTF/GFF exon coordinates for query genome filename.
+  -e, --exons-ref-file		<str>		TSV exon coordinates for reference genome filename.
+  -f, --exons-query-file	<str>		TSV exon coordinates for query genome filename.
   -l, --min-seq-length		<int>		Minimum length of CNE.
   -t, --sim-threshold		<dbl>		Threshold of similarity between sequences (0-1].
   -o, --output-file		<str>		Output filename with CNEs identified in BED format.
