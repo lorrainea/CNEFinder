@@ -978,6 +978,7 @@ int main(int argc, char **argv)
 	
 	//Obtaining exon coordinates
 	
+
 	for(int i=0; i<num_seqs_e; i++)
 	{
 		if( prefix( reinterpret_cast<char*>( ref_exons[i] ), chromosome_g1 ) == true ||  prefix( reinterpret_cast<char*>( ref_exons[i] ), chromosome_g1_nochr ) == true  )
@@ -1152,18 +1153,12 @@ int main(int argc, char **argv)
 
 
 	//remove all exons from reference 
-
+	string ref_str = reinterpret_cast<char*>(ref);
 	#pragma omp parallel for
 	for(int i=0; i<exons_g1_start->size(); i++)
-	{	
-		for( int j= exons_g1_start->at(i) - start_genome_1; j<exons_g1_end->at(i) - start_genome_1; j++ )
-		{	
-			if( j < strlen( ( char* ) ref ) )
-			{
-				ref[j] = '$';
-			}
-		}
-	}
+		ref_str.replace(exons_g1_start->at(i) - start_genome_1, exons_g1_end->at(i) - exons_g1_start->at(i),  exons_g1_end->at(i) - exons_g1_start->at(i), '$' );
+	
+	ref =  (unsigned char*) ref_str.c_str();
 
 	//Obtain query from genome2
 	bool g2Chromosome = false;
@@ -1219,18 +1214,15 @@ int main(int argc, char **argv)
 		return ( 1 );
 	}
 
+
 	//removing exons from query
+	string query_str = reinterpret_cast<char*>(query);
+
 	#pragma omp parallel for
 	for(int i=0; i<exons_g2_start->size(); i++)
-	{
-		for( int j= exons_g2_start->at(i) - start_genome_2; j<exons_g2_end->at(i) - start_genome_2; j++ )
-		{
-			if( j < strlen( ( char* ) query ) )
-			{
-				query[j] = '$';
-			}
-		}
-	}
+		query_str.replace(exons_g2_start->at(i) - start_genome_2, exons_g2_end->at(i) - exons_g2_start->at(i),  exons_g2_end->at(i) - exons_g2_start->at(i), '$' );
+
+	query = (unsigned char*) query_str.c_str();
 
 	delete( exons_g1_start );
 	delete( exons_g1_end );
@@ -1375,25 +1367,23 @@ int main(int argc, char **argv)
 	double end = gettime();
 
         fprintf( stderr, "Elapsed time: %lf secs.\n", end - start );
-
-	free ( ref );
+	ref_str.clear();
 	free ( ref_id );
-	free ( query );
+	query_str.clear();
 	free ( query_id );
         free ( sw . genome_one_filename );
 	free ( sw . genome_two_filename );
         free ( sw . output_filename );
+	free ( sw . ref_exons_filename );
+	free ( sw . query_exons_filename );
+	free ( sw . ref_genes_filename );
+	free ( sw . query_genes_filename );	
+	free ( sw . ref_gene_name );
+	free ( sw . query_gene_name );
+	free ( sw . ref_chrom );
+	free ( sw . query_chrom );
 
-	free( sw . ref_exons_filename );
-	free( sw . query_exons_filename );
-	free( sw . ref_genes_filename );
-	free( sw . query_genes_filename );	
-	free( sw . ref_gene_name );
-	free( sw . query_gene_name );
-	free( sw . ref_chrom );
-	free( sw . query_chrom );
-
-return 1;
+return 0;
 }
 
 unsigned int rev_complement( unsigned char * str, unsigned char * str2, int len )
